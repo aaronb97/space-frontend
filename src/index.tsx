@@ -21,7 +21,6 @@ root.render(
           element={<Login />}
         ></Route>
       </Routes>
-      <App />
     </BrowserRouter>
   </React.StrictMode>,
 );
