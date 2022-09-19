@@ -13,7 +13,7 @@ class Client {
     return this.post('speedboost');
   }
 
-  async updateTravelingTo(id: string) {
+  async updateTravelingTo(id: string | number) {
     return this.post(`travelingTo/${id}`);
   }
 

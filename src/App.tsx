@@ -70,9 +70,7 @@ function App() {
           <select
             onChange={(e) => {
               setSelectedPlanet(
-                planets.find(
-                  (planet: any) => planet.id === Number(e.target.value),
-                ),
+                planets.find((planet) => planet.id === Number(e.target.value)),
               );
             }}
             defaultValue=""
@@ -83,7 +81,7 @@ function App() {
             >
               Select a destination
             </option>
-            {planets.map((planet: any) => (
+            {planets.map((planet) => (
               <option
                 key={planet.id}
                 value={planet.id}
