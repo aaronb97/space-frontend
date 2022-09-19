@@ -17,6 +17,10 @@ class Client {
     return this.post(`travelingTo/${id}`);
   }
 
+  async getPlanets() {
+    return this.get('planets');
+  }
+
   private async post(path: string, user = auth.currentUser) {
     if (!user) {
       console.error('User not defined');
@@ -26,6 +30,21 @@ class Client {
     const token = await user.getIdToken();
 
     return axios.post(`${this.url}/${path}`, undefined, {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  private async get(path: string, user = auth.currentUser) {
+    if (!user) {
+      console.error('User not defined');
+      return;
+    }
+
+    const token = await user.getIdToken();
+
+    return axios.get(`${this.url}/${path}`, {
       headers: {
         authorization: `Bearer ${token}`,
       },

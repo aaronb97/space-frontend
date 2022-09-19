@@ -7,10 +7,17 @@ import { auth } from './firebaseApp';
 function App() {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<any>();
+  const [planets, setPlanets] = useState<any>();
+  const [selectedPlanet, setSelectedPlanet] = useState<any>();
 
   const getUserInfo = useCallback(async (user: User) => {
     const data = await client.login(user);
     setUserInfo(data?.data);
+  }, []);
+
+  const getPlanets = useCallback(async () => {
+    const data = await client.getPlanets();
+    setPlanets(data?.data);
   }, []);
 
   useEffect(() => {
@@ -19,11 +26,12 @@ function App() {
         navigate('/login');
       } else {
         getUserInfo(user);
+        getPlanets();
       }
     });
 
     return () => unsubsribe();
-  }, [navigate, getUserInfo]);
+  }, [navigate, getUserInfo, getPlanets]);
 
   if (!userInfo) {
     return <div>Loading...</div>;
@@ -57,33 +65,49 @@ function App() {
         </button>
       </div>
       <div>
-        <button
-          onClick={async () => {
-            try {
-              const result = await client.updateTravelingTo('1');
-              setUserInfo(result?.data);
-            } catch (e) {
-              console.error(e);
-            }
+        <select
+          onChange={(e) => {
+            setSelectedPlanet(
+              planets.find(
+                (planet: any) => planet.id === Number(e.target.value),
+              ),
+            );
           }}
         >
-          Go to The Sun
-        </button>
+          <option
+            selected={!selectedPlanet}
+            disabled
+          >
+            Select a destination
+          </option>
+          {planets?.map((planet: any) => (
+            <option
+              key={planet.id}
+              value={planet.id}
+            >
+              {planet.name}
+            </option>
+          ))}
+        </select>
       </div>
-      <div>
-        <button
-          onClick={async () => {
-            try {
-              const result = await client.updateTravelingTo('2');
-              setUserInfo(result?.data);
-            } catch (e) {
-              console.error(e);
-            }
-          }}
-        >
-          Go to Earth
-        </button>
-      </div>
+      {selectedPlanet && (
+        <div>
+          <button
+            onClick={async () => {
+              try {
+                const result = await client.updateTravelingTo(
+                  selectedPlanet.id,
+                );
+                setUserInfo(result?.data);
+              } catch (e) {
+                console.error(e);
+              }
+            }}
+          >
+            Go to {selectedPlanet.name}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
