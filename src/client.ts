@@ -1,23 +1,27 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { User } from 'firebase/auth';
 import { auth } from './firebaseApp';
+import { Planet } from './types/Planet';
+import { UserData } from './types/UserData';
 
 class Client {
   constructor(private readonly url: string) {}
 
-  async login(user: User | null) {
+  async login(user: User | null): Promise<AxiosResponse<UserData> | undefined> {
     return this.post('login', user);
   }
 
-  async speedboost() {
+  async speedboost(): Promise<AxiosResponse<UserData> | undefined> {
     return this.post('speedboost');
   }
 
-  async updateTravelingTo(id: string | number) {
+  async updateTravelingTo(
+    id: string | number,
+  ): Promise<AxiosResponse<UserData> | undefined> {
     return this.post(`travelingTo/${id}`);
   }
 
-  async getPlanets() {
+  async getPlanets(): Promise<AxiosResponse<Planet[]> | undefined> {
     return this.get('planets');
   }
 
