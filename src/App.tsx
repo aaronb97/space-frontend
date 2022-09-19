@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { client } from './client';
 import { auth } from './firebaseApp';
 import { Planet } from './types/Planet';
+import { UserData } from './types/UserData';
 
 function App() {
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState<any>();
+  const [userInfo, setUserInfo] = useState<UserData>();
   const [planets, setPlanets] = useState<Planet[]>();
   const [selectedPlanet, setSelectedPlanet] = useState<Planet>();
 
