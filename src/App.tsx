@@ -3,12 +3,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { client } from './client';
 import { auth } from './firebaseApp';
+import { Planet } from './types/Planet';
 
 function App() {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<any>();
-  const [planets, setPlanets] = useState<any>();
-  const [selectedPlanet, setSelectedPlanet] = useState<any>();
+  const [planets, setPlanets] = useState<Planet[]>();
+  const [selectedPlanet, setSelectedPlanet] = useState<Planet>();
 
   const getUserInfo = useCallback(async (user: User) => {
     const data = await client.login(user);
@@ -64,32 +65,35 @@ function App() {
           Speed boost
         </button>
       </div>
-      <div>
-        <select
-          onChange={(e) => {
-            setSelectedPlanet(
-              planets.find(
-                (planet: any) => planet.id === Number(e.target.value),
-              ),
-            );
-          }}
-        >
-          <option
-            selected={!selectedPlanet}
-            disabled
+      {planets && (
+        <div>
+          <select
+            onChange={(e) => {
+              setSelectedPlanet(
+                planets.find(
+                  (planet: any) => planet.id === Number(e.target.value),
+                ),
+              );
+            }}
+            defaultValue=""
           >
-            Select a destination
-          </option>
-          {planets?.map((planet: any) => (
             <option
-              key={planet.id}
-              value={planet.id}
+              value=""
+              disabled
             >
-              {planet.name}
+              Select a destination
             </option>
-          ))}
-        </select>
-      </div>
+            {planets.map((planet: any) => (
+              <option
+                key={planet.id}
+                value={planet.id}
+              >
+                {planet.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       {selectedPlanet && (
         <div>
           <button
