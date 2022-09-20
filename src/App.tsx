@@ -40,17 +40,15 @@ function App() {
   }
 
   const nextBoost =
-    (new Date(userInfo.nextBoost).getTime() -
-      new Date(userInfo.serverTime).getTime()) /
-    60 /
-    60 /
-    1000;
+    new Date(userInfo.nextBoost).getTime() -
+    new Date(userInfo.serverTime).getTime();
 
   return (
     <div className="App">
       <header className="App-header"></header>
       <div>Signed in as {userInfo.username}</div>
-      <div>Traveling to {userInfo.planet.name}</div>
+      {userInfo.status === 0 && <div>Traveling to {userInfo.planet.name}</div>}
+      {userInfo.status === 1 && <div>Welcome to {userInfo.planet.name}</div>}
       <div>Base speed: {userInfo.baseSpeed}</div>
       <div>Pos X: {userInfo.positionX.toFixed()}</div>
       <div>Pos Y: {userInfo.positionY.toFixed()}</div>
@@ -58,7 +56,18 @@ function App() {
       <div>Vel X: {userInfo.velocityX.toFixed()}</div>
       <div>Vel Y: {userInfo.velocityY.toFixed()}</div>
       <div>Vel Z: {userInfo.velocityZ.toFixed()}</div>
-      <div>Next boost: {nextBoost.toFixed(2)} hours</div>
+      {!Number.isNaN(nextBoost) && (
+        <div>Next boost: {getDateString(nextBoost)}</div>
+      )}
+      {userInfo.landingTime && (
+        <div>
+          Landing:{' '}
+          {getDateString(
+            new Date(userInfo.landingTime).getTime() -
+              new Date(userInfo.serverTime).getTime(),
+          )}
+        </div>
+      )}
       <div>
         <button onClick={() => signOut(auth)}>Sign Out</button>
       </div>
@@ -123,6 +132,33 @@ function App() {
       )}
     </div>
   );
+}
+
+function getDateString(milliseconds: number) {
+  let parts = [];
+
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days) {
+    parts.push(`${days} days`);
+  }
+
+  if (hours) {
+    parts.push(`${hours % 24} hours`);
+  }
+
+  if (minutes) {
+    parts.push(`${minutes % 60} minutes`);
+  }
+
+  if (seconds) {
+    parts.push(`${seconds % 60} seconds`);
+  }
+
+  return parts.join(', ');
 }
 
 export default App;

@@ -1,6 +1,7 @@
 import { Planet } from './Planet';
 
 export interface UserData {
+  status: number;
   username: string;
   baseSpeed: string;
   positionX: number;
@@ -11,6 +12,7 @@ export interface UserData {
   velocityZ: number;
   nextBoost: string;
   serverTime: string;
+  landingTime?: string;
 
   planet: Planet;
 }
