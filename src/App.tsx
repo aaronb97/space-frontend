@@ -44,10 +44,13 @@ function App() {
       <header className="App-header"></header>
       <div>Signed in as {userInfo.username}</div>
       <div>Traveling to {userInfo.planet.name}</div>
-      <div>Velocities:</div>
-      <div>{userInfo.velocityX}</div>
-      <div>{userInfo.velocityY}</div>
-      <div>{userInfo.velocityZ}</div>
+      <div>Base speed: {userInfo.baseSpeed}</div>
+      <div>Pos X: {userInfo.positionX}</div>
+      <div>Pos Y: {userInfo.positionY}</div>
+      <div>Pos Z: {userInfo.positionZ}</div>
+      <div>Vel X: {userInfo.velocityX}</div>
+      <div>Vel Y: {userInfo.velocityY}</div>
+      <div>Vel Z: {userInfo.velocityZ}</div>
       <div>Next boost: {userInfo.nextBoost}</div>
       <div>
         <button onClick={() => signOut(auth)}>Sign Out</button>
