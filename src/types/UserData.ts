@@ -10,6 +10,7 @@ export interface UserData {
   velocityY: number;
   velocityZ: number;
   nextBoost: string;
+  serverTime: string;
 
   planet: Planet;
 }
