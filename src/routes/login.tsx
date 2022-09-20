@@ -20,12 +20,10 @@ export function Login() {
     return () => unsubscribe();
   }, [navigate]);
 
-  const onClick = async () => {
-    try {
-      signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (e) {
-      console.error(e);
-    }
+  const onClick = () => {
+    signInWithPopup(auth, new GoogleAuthProvider()).catch((e) =>
+      console.error(e),
+    );
   };
 
   return <button onClick={onClick}>Sign in with Google</button>;

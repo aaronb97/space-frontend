@@ -3,7 +3,8 @@ import { Planet } from './Planet';
 export interface UserData {
   status: number;
   username: string;
-  baseSpeed: string;
+  speed: number;
+  baseSpeed: number;
   positionX: number;
   positionY: number;
   positionZ: number;

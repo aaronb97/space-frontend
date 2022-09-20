@@ -8,21 +8,21 @@ class Client {
   constructor(private readonly url: string) {}
 
   async login(user: User | null): Promise<AxiosResponse<UserData> | undefined> {
-    return this.post('login', user);
+    return await this.post('login', user);
   }
 
   async speedboost(): Promise<AxiosResponse<UserData> | undefined> {
-    return this.post('speedboost');
+    return await this.post('speedboost');
   }
 
   async updateTravelingTo(
     id: string | number,
   ): Promise<AxiosResponse<UserData> | undefined> {
-    return this.post(`travelingTo/${id}`);
+    return await this.post(`travelingTo/${id}`);
   }
 
   async getPlanets(): Promise<AxiosResponse<Planet[]> | undefined> {
-    return this.get('planets');
+    return await this.get('planets');
   }
 
   private async post(path: string, user = auth.currentUser) {
@@ -33,7 +33,7 @@ class Client {
 
     const token = await user.getIdToken();
 
-    return axios.post(`${this.url}/${path}`, undefined, {
+    return await axios.post(`${this.url}/${path}`, undefined, {
       headers: {
         authorization: `Bearer ${token}`,
       },
@@ -48,7 +48,7 @@ class Client {
 
     const token = await user.getIdToken();
 
-    return axios.get(`${this.url}/${path}`, {
+    return await axios.get(`${this.url}/${path}`, {
       headers: {
         authorization: `Bearer ${token}`,
       },

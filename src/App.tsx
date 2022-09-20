@@ -2,6 +2,7 @@ import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { client } from './client';
+import { Countdown } from './components/Countdown';
 import { auth } from './firebaseApp';
 import { Planet } from './types/Planet';
 import { UserData } from './types/UserData';
@@ -27,8 +28,8 @@ function App() {
       if (!user) {
         navigate('/login');
       } else {
-        getUserInfo(user);
-        getPlanets();
+        void getUserInfo(user);
+        void getPlanets();
       }
     });
 
@@ -43,43 +44,50 @@ function App() {
     new Date(userInfo.nextBoost).getTime() -
     new Date(userInfo.serverTime).getTime();
 
+  const landingTime = userInfo.landingTime
+    ? new Date(userInfo.landingTime).getTime() -
+      new Date(userInfo.serverTime).getTime()
+    : undefined;
+
   return (
     <div className="App">
       <header className="App-header"></header>
       <div>Signed in as {userInfo.username}</div>
       {userInfo.status === 0 && <div>Traveling to {userInfo.planet.name}</div>}
       {userInfo.status === 1 && <div>Welcome to {userInfo.planet.name}</div>}
-      <div>Base speed: {userInfo.baseSpeed}</div>
+      <div>Speed: {userInfo.speed}</div>
       <div>Pos X: {userInfo.positionX.toFixed()}</div>
       <div>Pos Y: {userInfo.positionY.toFixed()}</div>
       <div>Pos Z: {userInfo.positionZ.toFixed()}</div>
       <div>Vel X: {userInfo.velocityX.toFixed()}</div>
       <div>Vel Y: {userInfo.velocityY.toFixed()}</div>
       <div>Vel Z: {userInfo.velocityZ.toFixed()}</div>
-      {!Number.isNaN(nextBoost) && (
-        <div>Next boost: {getDateString(nextBoost)}</div>
-      )}
-      {userInfo.landingTime && (
-        <div>
-          Landing:{' '}
-          {getDateString(
-            new Date(userInfo.landingTime).getTime() -
-              new Date(userInfo.serverTime).getTime(),
-          )}
-        </div>
+      <Countdown
+        title={'Next Boost'}
+        initialTime={nextBoost / 1000}
+      ></Countdown>
+      {landingTime && (
+        <Countdown
+          title={'Landing'}
+          initialTime={landingTime / 1000}
+        ></Countdown>
       )}
       <div>
-        <button onClick={() => signOut(auth)}>Sign Out</button>
+        <button
+          onClick={() => {
+            void signOut(auth);
+          }}
+        >
+          Sign Out
+        </button>
       </div>
       <div>
         <button
-          onClick={async () => {
-            try {
-              const result = await client.speedboost();
-              setUserInfo(result?.data);
-            } catch (e) {
-              console.error(e);
-            }
+          onClick={() => {
+            client
+              .speedboost()
+              .then((result) => setUserInfo(result?.data))
+              .catch((e) => console.error(e));
           }}
         >
           Speed boost
@@ -115,15 +123,11 @@ function App() {
       {selectedPlanet && (
         <div>
           <button
-            onClick={async () => {
-              try {
-                const result = await client.updateTravelingTo(
-                  selectedPlanet.id,
-                );
-                setUserInfo(result?.data);
-              } catch (e) {
-                console.error(e);
-              }
+            onClick={() => {
+              client
+                .updateTravelingTo(selectedPlanet.id)
+                .then((result) => setUserInfo(result?.data))
+                .catch((e) => console.error(e));
             }}
           >
             Go to {selectedPlanet.name}
@@ -132,33 +136,6 @@ function App() {
       )}
     </div>
   );
-}
-
-function getDateString(milliseconds: number) {
-  let parts = [];
-
-  const seconds = Math.floor(milliseconds / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days) {
-    parts.push(`${days} days`);
-  }
-
-  if (hours) {
-    parts.push(`${hours % 24} hours`);
-  }
-
-  if (minutes) {
-    parts.push(`${minutes % 60} minutes`);
-  }
-
-  if (seconds) {
-    parts.push(`${seconds % 60} seconds`);
-  }
-
-  return parts.join(', ');
 }
 
 export default App;
