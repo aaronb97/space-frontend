@@ -4,9 +4,10 @@ import { getDateString } from '../../utils/getDateString';
 interface Props {
   title: string;
   initialTime: number;
+  belowZeroFallback?: string;
 }
 
-export function Countdown({ initialTime, title }: Props) {
+export function Countdown({ initialTime, title, belowZeroFallback }: Props) {
   const [time, setTime] = useState(initialTime);
 
   useEffect(() => {
@@ -20,6 +21,10 @@ export function Countdown({ initialTime, title }: Props) {
 
     return () => clearTimeout(timer);
   });
+
+  if (time < 0 && belowZeroFallback) {
+    return <div>{belowZeroFallback}</div>;
+  }
 
   return (
     <div>

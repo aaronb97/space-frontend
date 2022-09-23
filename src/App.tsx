@@ -65,11 +65,13 @@ function App() {
       <Countdown
         title={'Next Boost'}
         initialTime={nextBoost / 1000}
+        belowZeroFallback="You have an available Speed Boost!"
       ></Countdown>
       {landingTime && (
         <Countdown
           title={'Landing'}
           initialTime={landingTime / 1000}
+          belowZeroFallback="Landing shortly..."
         ></Countdown>
       )}
       <div>
