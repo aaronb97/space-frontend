@@ -6,12 +6,13 @@ import { client } from './client';
 export const useUserData = (user: User) => {
   const queryClient = useQueryClient();
 
-  const { data: userInfoData } = useQuery(
+  const { data: userInfoData, error } = useQuery(
     ['userInfo', user.uid],
     async () => await client.login(user),
     {
       staleTime: 5 * 60 * 1000,
       refetchInterval: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
     },
   );
 
@@ -27,5 +28,6 @@ export const useUserData = (user: User) => {
   return {
     userInfo: userInfoData?.data,
     invalidate,
+    error,
   };
 };

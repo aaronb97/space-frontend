@@ -1,10 +1,10 @@
 import { signOut, User } from 'firebase/auth';
 import { useState } from 'react';
-import { useQuery } from 'react-query';
 import { client } from './client';
 import { Counter } from './components/Counter';
 import { auth } from './firebaseApp';
 import { Planet } from './types/Planet';
+import { usePlanets } from './usePlanets';
 import { useUserData } from './useUserData';
 import { getDateString } from './utils/getDateString';
 
@@ -15,15 +15,21 @@ interface Props {
 export function Game({ user }: Props) {
   const [selectedPlanet, setSelectedPlanet] = useState<Planet>();
 
-  const { userInfo, invalidate: invalidateUserInfo } = useUserData(user);
+  const {
+    userInfo,
+    invalidate: invalidateUserInfo,
+    error: userError,
+  } = useUserData(user);
+  const { planets, error: planetsError } = usePlanets();
 
-  const { data: planetData } = useQuery(
-    ['planets'],
-    async () => await client.getPlanets(),
-    { staleTime: Infinity, cacheTime: Infinity },
-  );
-
-  const planets = planetData?.data;
+  if (userError || planetsError) {
+    return (
+      <div>
+        Holey smokes! Space Game ran into a problem. We have notified our
+        engineers about this and they are working VERY hard to fix the issue.
+      </div>
+    );
+  }
 
   if (!userInfo) {
     return <div>Loading...</div>;
