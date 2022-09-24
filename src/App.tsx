@@ -98,7 +98,7 @@ function App() {
           decrement
           title={'Landing'}
           initialValue={landingTime / 1000}
-          render={(time) => (time <= 0 ? 'Soon...' : getDateString(time))}
+          render={(time) => (time <= 1 ? 'Soon...' : getDateString(time))}
         ></Counter>
       )}
       <div>
