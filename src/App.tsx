@@ -2,10 +2,11 @@ import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { client } from './client';
-import { Countdown } from './components/Countdown';
+import { Counter } from './components/Counter';
 import { auth } from './firebaseApp';
 import { Planet } from './types/Planet';
 import { UserData } from './types/UserData';
+import { getDateString } from './utils/getDateString';
 
 function App() {
   const navigate = useNavigate();
@@ -56,23 +57,49 @@ function App() {
       {userInfo.status === 0 && <div>Traveling to {userInfo.planet.name}</div>}
       {userInfo.status === 1 && <div>Welcome to {userInfo.planet.name}</div>}
       <div>Speed: {userInfo.speed}</div>
-      <div>Pos X: {userInfo.positionX.toFixed()}</div>
-      <div>Pos Y: {userInfo.positionY.toFixed()}</div>
-      <div>Pos Z: {userInfo.positionZ.toFixed()}</div>
+      <Counter
+        decrement={userInfo.velocityX < 0}
+        title={'Pos X'}
+        initialValue={userInfo.positionX}
+        render={(position) => position.toFixed()}
+        interval={Math.abs((1 / userInfo.velocityX) * 60 * 60 * 1000)}
+      ></Counter>
+      <Counter
+        decrement={userInfo.velocityY < 0}
+        title={'Pos Y'}
+        initialValue={userInfo.positionY}
+        render={(position) => position.toFixed()}
+        interval={Math.abs((1 / userInfo.velocityY) * 60 * 60 * 1000)}
+      ></Counter>
+      <Counter
+        decrement={userInfo.velocityZ < 0}
+        title={'Pos Z'}
+        initialValue={userInfo.positionZ}
+        render={(position) => position.toFixed()}
+        interval={Math.abs((1 / userInfo.velocityZ) * 60 * 60 * 1000)}
+      ></Counter>
       <div>Vel X: {userInfo.velocityX.toFixed()}</div>
       <div>Vel Y: {userInfo.velocityY.toFixed()}</div>
       <div>Vel Z: {userInfo.velocityZ.toFixed()}</div>
-      <Countdown
-        title={'Next Boost'}
-        initialTime={nextBoost / 1000}
-        belowZeroFallback="You have an available Speed Boost!"
-      ></Countdown>
+      {userInfo.status === 0 && (
+        <Counter
+          decrement
+          title={'Next Boost'}
+          initialValue={nextBoost / 1000}
+          render={(time) =>
+            time <= 0
+              ? 'You have an available Speed Boost!'
+              : getDateString(time)
+          }
+        ></Counter>
+      )}
       {landingTime && (
-        <Countdown
+        <Counter
+          decrement
           title={'Landing'}
-          initialTime={landingTime / 1000}
-          belowZeroFallback="Landing shortly..."
-        ></Countdown>
+          initialValue={landingTime / 1000}
+          render={(time) => (time <= 0 ? 'Soon...' : getDateString(time))}
+        ></Counter>
       )}
       <div>
         <button
