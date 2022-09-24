@@ -142,6 +142,7 @@ function App() {
               <option
                 key={planet.id}
                 value={planet.id}
+                disabled={userInfo.planet.id === planet.id}
               >
                 {planet.name}
               </option>
