@@ -56,7 +56,7 @@ function App() {
       <div>Signed in as {userInfo.username}</div>
       {userInfo.status === 0 && <div>Traveling to {userInfo.planet.name}</div>}
       {userInfo.status === 1 && <div>Welcome to {userInfo.planet.name}</div>}
-      <div>Speed: {userInfo.speed}</div>
+      <div>Speed: {userInfo.speed.toLocaleString()} km/hour</div>
       <Counter
         decrement={userInfo.velocityX < 0}
         title={'Pos X'}
