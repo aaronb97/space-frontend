@@ -1,10 +1,11 @@
 import { signOut, User } from 'firebase/auth';
 import { useState } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 import { client } from './client';
 import { Counter } from './components/Counter';
 import { auth } from './firebaseApp';
 import { Planet } from './types/Planet';
+import { useUserData } from './useUserData';
 import { getDateString } from './utils/getDateString';
 
 interface Props {
@@ -13,14 +14,8 @@ interface Props {
 
 export function Game({ user }: Props) {
   const [selectedPlanet, setSelectedPlanet] = useState<Planet>();
-  const queryClient = useQueryClient();
-  const { invalidateQueries } = queryClient;
 
-  const { data: userInfoData } = useQuery(
-    ['userInfo', user.uid],
-    async () => await client.login(user),
-    { staleTime: 5 * 60 * 1000, refetchInterval: 5 * 60 * 1000 },
-  );
+  const { userInfo, invalidate: invalidateUserInfo } = useUserData(user);
 
   const { data: planetData } = useQuery(
     ['planets'],
@@ -29,8 +24,6 @@ export function Game({ user }: Props) {
   );
 
   const planets = planetData?.data;
-
-  const userInfo = userInfoData?.data;
 
   if (!userInfo) {
     return <div>Loading...</div>;
@@ -110,7 +103,7 @@ export function Game({ user }: Props) {
           onClick={() => {
             client
               .speedboost()
-              .then(async () => await invalidateQueries(['userInfo']))
+              .then(async () => await invalidateUserInfo())
               .catch((e) => console.error(e));
           }}
         >
@@ -151,7 +144,7 @@ export function Game({ user }: Props) {
             onClick={() => {
               client
                 .updateTravelingTo(selectedPlanet.id)
-                .then(async () => await invalidateQueries(['userInfo']))
+                .then(async () => await invalidateUserInfo())
                 .catch((e) => console.error(e));
             }}
           >

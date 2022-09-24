@@ -26,7 +26,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="App">
-        <header className="App-header">{user && <Game user={user} />}</header>
+        <header className="App-header">
+          {user ? <Game user={user} /> : 'Loading...'}
+        </header>
       </div>
     </QueryClientProvider>
   );
