@@ -43,11 +43,11 @@ const Purple = styled.div`
 
 const ItemDisplay = ({ item }: { item: { name: string; rarity: string } }) => {
   if (item.rarity === 'legendary') {
-    return <Purple>{item.name} 💎</Purple>;
+    return <Purple>{item.name} (legendary) 💎</Purple>;
   }
 
   if (item.rarity === 'rare') {
-    return <Yellow>{item.name} ✨</Yellow>;
+    return <Yellow>{item.name} (rare) ✨</Yellow>;
   }
 
   return <div>{item.name}</div>;
