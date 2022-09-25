@@ -41,10 +41,15 @@ const Header = styled.header`
   margin: 8px;
 `;
 
+const Footer = styled.footer`
+  position: fixed;
+  bottom: 8px;
+`;
+
 const SignOutButton = () => {
   return (
     <button
-      style={{ marginTop: '8px' }}
+      style={{ margin: '8px' }}
       onClick={() => {
         void signOut(auth);
       }}
@@ -103,9 +108,6 @@ export function Game({ user }: Props) {
       <Header>
         <div>
           <div>Signed in as {userInfo.username}</div>
-          <div>
-            <SignOutButton />
-          </div>
         </div>
         <div>
           <button
@@ -258,6 +260,9 @@ export function Game({ user }: Props) {
           </FlexContainer>
         </div>
       </Center>
+      <Footer>
+        <SignOutButton />
+      </Footer>
     </div>
   );
 }
