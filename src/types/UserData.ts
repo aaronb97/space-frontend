@@ -14,6 +14,10 @@ export interface UserData {
   nextBoost: string;
   serverTime: string;
   landingTime?: string;
+  items?: Array<{
+    name: string;
+    rarity: string;
+  }>;
 
   planet: Planet;
 }

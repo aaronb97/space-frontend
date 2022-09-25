@@ -51,27 +51,22 @@ export function Game({ user }: Props) {
       {userInfo.status === 0 && <div>Traveling to {userInfo.planet.name}</div>}
       {userInfo.status === 1 && <div>Welcome to {userInfo.planet.name}</div>}
       <div>Speed: {userInfo.speed.toLocaleString()} km/hour</div>
-      <Counter
-        decrement={userInfo.velocityX < 0}
+      <PositionCounter
         title={'Pos X'}
-        initialValue={userInfo.positionX}
-        render={(position) => position.toFixed()}
-        interval={Math.abs((1 / userInfo.velocityX) * 60 * 60 * 1000)}
-      ></Counter>
-      <Counter
-        decrement={userInfo.velocityY < 0}
-        title={'Pos Y'}
-        initialValue={userInfo.positionY}
-        render={(position) => position.toFixed()}
-        interval={Math.abs((1 / userInfo.velocityY) * 60 * 60 * 1000)}
-      ></Counter>
-      <Counter
-        decrement={userInfo.velocityZ < 0}
-        title={'Pos Z'}
-        initialValue={userInfo.positionZ}
-        render={(position) => position.toFixed()}
-        interval={Math.abs((1 / userInfo.velocityZ) * 60 * 60 * 1000)}
-      ></Counter>
+        position={userInfo.positionX}
+        velocity={userInfo.velocityX}
+      />
+      <PositionCounter
+        title={'Pos X'}
+        position={userInfo.positionY}
+        velocity={userInfo.velocityY}
+      />
+      <PositionCounter
+        title={'Pos X'}
+        position={userInfo.positionZ}
+        velocity={userInfo.velocityZ}
+      />
+
       <div>Vel X: {userInfo.velocityX.toFixed()}</div>
       <div>Vel Y: {userInfo.velocityY.toFixed()}</div>
       <div>Vel Z: {userInfo.velocityZ.toFixed()}</div>
@@ -93,6 +88,9 @@ export function Game({ user }: Props) {
           title={'Landing'}
           initialValue={landingTime / 1000}
           render={(time) => (time <= 1 ? 'Soon...' : getDateString(time))}
+          onReachZero={() => {
+            void invalidateUserInfo();
+          }}
         ></Counter>
       )}
       <div>
@@ -158,6 +156,41 @@ export function Game({ user }: Props) {
           </button>
         </div>
       )}
+      {userInfo?.items?.map((item) => (
+        <div key={item.name}>
+          {item.name} ({item.rarity})
+        </div>
+      ))}
     </div>
   );
 }
+
+interface PositionCounterProps {
+  velocity: number;
+  position: number;
+  title: string;
+}
+
+const PositionCounter = ({
+  velocity,
+  position,
+  title,
+}: PositionCounterProps) => {
+  if (velocity === 0) {
+    return (
+      <div>
+        {title} {position.toFixed()}
+      </div>
+    );
+  }
+
+  return (
+    <Counter
+      decrement={velocity < 0}
+      title={title}
+      initialValue={position}
+      render={(position) => position.toFixed()}
+      interval={Math.abs((1 / velocity) * 60 * 60 * 1000)}
+    ></Counter>
+  );
+};
