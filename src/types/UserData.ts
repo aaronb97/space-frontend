@@ -18,6 +18,7 @@ export interface UserData {
     name: string;
     rarity: string;
   }>;
+  speedBoostAvailable: boolean;
 
   planet: Planet;
 }

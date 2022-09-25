@@ -7,10 +7,32 @@ import { Planet } from './types/Planet';
 import { usePlanets } from './usePlanets';
 import { useUserData } from './useUserData';
 import { getDateString } from './utils/getDateString';
+import styled from 'styled-components';
 
 interface Props {
   user: User;
 }
+
+const Center = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 500px;
+`;
+
+const Section = styled.div`
+  margin-top: 16px;
+  margin-bottom: 16px;
+`;
+
+const FlexContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+`;
 
 export function Game({ user }: Props) {
   const [selectedPlanet, setSelectedPlanet] = useState<Planet>();
@@ -48,51 +70,6 @@ export function Game({ user }: Props) {
     <div className="App">
       <header className="App-header"></header>
       <div>Signed in as {userInfo.username}</div>
-      {userInfo.status === 0 && <div>Traveling to {userInfo.planet.name}</div>}
-      {userInfo.status === 1 && <div>Welcome to {userInfo.planet.name}</div>}
-      <div>Speed: {userInfo.speed.toLocaleString()} km/hour</div>
-      <PositionCounter
-        title={'Pos X'}
-        position={userInfo.positionX}
-        velocity={userInfo.velocityX}
-      />
-      <PositionCounter
-        title={'Pos X'}
-        position={userInfo.positionY}
-        velocity={userInfo.velocityY}
-      />
-      <PositionCounter
-        title={'Pos X'}
-        position={userInfo.positionZ}
-        velocity={userInfo.velocityZ}
-      />
-
-      <div>Vel X: {userInfo.velocityX.toFixed()}</div>
-      <div>Vel Y: {userInfo.velocityY.toFixed()}</div>
-      <div>Vel Z: {userInfo.velocityZ.toFixed()}</div>
-      {userInfo.status === 0 && (
-        <Counter
-          decrement
-          title={'Next Boost'}
-          initialValue={nextBoost / 1000}
-          render={(time) =>
-            time <= 0
-              ? 'You have an available Speed Boost!'
-              : getDateString(time)
-          }
-        ></Counter>
-      )}
-      {landingTime && (
-        <Counter
-          decrement
-          title={'Landing'}
-          initialValue={landingTime / 1000}
-          render={(time) => (time <= 1 ? 'Soon...' : getDateString(time))}
-          onReachZero={() => {
-            void invalidateUserInfo();
-          }}
-        ></Counter>
-      )}
       <div>
         <button
           onClick={() => {
@@ -102,65 +79,133 @@ export function Game({ user }: Props) {
           Sign Out
         </button>
       </div>
-      <div>
-        <button
-          onClick={() => {
-            client
-              .speedboost()
-              .then(async () => await invalidateUserInfo())
-              .catch((e) => console.error(e));
-          }}
-        >
-          Speed boost
-        </button>
-      </div>
-      {planets && (
+      <Center>
         <div>
-          <select
-            onChange={(e) => {
-              setSelectedPlanet(
-                planets.find((planet) => planet.id === Number(e.target.value)),
-              );
-            }}
-            defaultValue=""
-          >
-            <option
-              value=""
-              disabled
-            >
-              Select a destination
-            </option>
-            {planets.map((planet) => (
-              <option
-                key={planet.id}
-                value={planet.id}
-                disabled={userInfo.planet.id === planet.id}
+          {userInfo.status === 0 && (
+            <div>Traveling to {userInfo.planet.name}</div>
+          )}
+          {userInfo.status === 1 && (
+            <div>Welcome to {userInfo.planet.name}</div>
+          )}
+          <Section>
+            <div>Speed: {userInfo.speed.toLocaleString()} km/hour</div>
+            <div>
+              {'Coordinates: '}
+              <PositionCounter
+                position={userInfo.positionX}
+                velocity={userInfo.velocityX}
+              />
+              {', '}
+              <PositionCounter
+                position={userInfo.positionY}
+                velocity={userInfo.velocityY}
+              />
+              {', '}
+              <PositionCounter
+                position={userInfo.positionZ}
+                velocity={userInfo.velocityZ}
+              />
+            </div>
+          </Section>
+          <Section>
+            {userInfo.status === 0 && !userInfo.speedBoostAvailable && (
+              <div>
+                {'Next Boost: '}
+                <Counter
+                  decrement
+                  initialValue={nextBoost / 1000}
+                  render={(time) =>
+                    time <= 0
+                      ? 'Speed Boost available shortly...'
+                      : getDateString(time)
+                  }
+                  onReachZero={() => {
+                    void invalidateUserInfo();
+                  }}
+                ></Counter>
+              </div>
+            )}
+            {userInfo.speedBoostAvailable && (
+              <Section>
+                <FlexContainer>
+                  <div>You have an available Speed Boost!</div>
+                  <div>
+                    <button
+                      onClick={() => {
+                        client
+                          .speedboost()
+                          .then(async () => await invalidateUserInfo())
+                          .catch((e) => console.error(e));
+                      }}
+                    >
+                      Speed boost
+                    </button>
+                  </div>
+                </FlexContainer>
+              </Section>
+            )}
+            {landingTime && (
+              <div>
+                {'Landing: '}
+                <Counter
+                  decrement
+                  initialValue={landingTime / 1000}
+                  render={(time) =>
+                    time <= 1 ? 'Soon...' : getDateString(time)
+                  }
+                  onReachZero={() => {
+                    void invalidateUserInfo();
+                  }}
+                ></Counter>
+              </div>
+            )}
+          </Section>
+          <FlexContainer>
+            {planets && (
+              <select
+                onChange={(e) => {
+                  setSelectedPlanet(
+                    planets.find(
+                      (planet) => planet.id === Number(e.target.value),
+                    ),
+                  );
+                }}
+                defaultValue=""
               >
-                {planet.name}
-              </option>
-            ))}
-          </select>
+                <option
+                  value=""
+                  disabled
+                >
+                  Select a destination
+                </option>
+                {planets.map((planet) => (
+                  <option
+                    key={planet.id}
+                    value={planet.id}
+                    disabled={userInfo.planet.id === planet.id}
+                  >
+                    {planet.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            {selectedPlanet && (
+              <div>
+                <button
+                  onClick={() => {
+                    client
+                      .updateTravelingTo(selectedPlanet.id)
+                      .then(async () => await invalidateUserInfo())
+                      .catch((e) => console.error(e));
+                  }}
+                >
+                  Go to {selectedPlanet.name}
+                </button>
+              </div>
+            )}
+          </FlexContainer>
         </div>
-      )}
-      {selectedPlanet && (
-        <div>
-          <button
-            onClick={() => {
-              client
-                .updateTravelingTo(selectedPlanet.id)
-                .then(async () => await invalidateUserInfo())
-                .catch((e) => console.error(e));
-            }}
-          >
-            Go to {selectedPlanet.name}
-          </button>
-        </div>
-      )}
-      {userInfo?.items?.map((item) => (
-        <div key={item.name}>
-          {item.name} ({item.rarity})
-        </div>
-      ))}
+      </Center>
     </div>
   );
 }
@@ -168,26 +213,16 @@ export function Game({ user }: Props) {
 interface PositionCounterProps {
   velocity: number;
   position: number;
-  title: string;
 }
 
-const PositionCounter = ({
-  velocity,
-  position,
-  title,
-}: PositionCounterProps) => {
+const PositionCounter = ({ velocity, position }: PositionCounterProps) => {
   if (velocity === 0) {
-    return (
-      <div>
-        {title} {position.toFixed()}
-      </div>
-    );
+    return <>{position.toFixed()}</>;
   }
 
   return (
     <Counter
       decrement={velocity < 0}
-      title={title}
       initialValue={position}
       render={(position) => position.toFixed()}
       interval={Math.abs((1 / velocity) * 60 * 60 * 1000)}

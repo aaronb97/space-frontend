@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 interface Props {
-  title: string;
   initialValue: number;
   render: (value: number) => number | string;
   decrement?: boolean;
@@ -11,7 +10,6 @@ interface Props {
 
 export function Counter({
   initialValue,
-  title,
   render,
   interval = 1000,
   decrement = false,
@@ -35,9 +33,5 @@ export function Counter({
     return () => clearTimeout(timer);
   });
 
-  return (
-    <div>
-      {title}: {render(value)}
-    </div>
-  );
+  return <>{render(value)}</>;
 }
