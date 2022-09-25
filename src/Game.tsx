@@ -35,6 +35,25 @@ const FlexContainer = styled.div`
   justify-content: center;
 `;
 
+const Header = styled.header`
+  display: flex;
+  justify-content: space-between;
+  margin: 8px;
+`;
+
+const SignOutButton = () => {
+  return (
+    <button
+      style={{ marginTop: '8px' }}
+      onClick={() => {
+        void signOut(auth);
+      }}
+    >
+      Sign Out
+    </button>
+  );
+};
+
 export function Game({ user }: Props) {
   const [selectedPlanet, setSelectedPlanet] = useState<number | ''>('');
   const navigate = useNavigate();
@@ -81,24 +100,23 @@ export function Game({ user }: Props) {
 
   return (
     <div className="App">
-      <header className="App-header"></header>
-      <div>Signed in as {userInfo.username}</div>
-      <div>
-        <button
-          onClick={() => {
-            void signOut(auth);
-          }}
-        >
-          Sign Out
-        </button>
-      </div>
-      <button
-        onClick={() => {
-          navigate('/items');
-        }}
-      >
-        Go to Items
-      </button>
+      <Header>
+        <div>
+          <div>Signed in as {userInfo.username}</div>
+          <div>
+            <SignOutButton />
+          </div>
+        </div>
+        <div>
+          <button
+            onClick={() => {
+              navigate('/items');
+            }}
+          >
+            Go to Items
+          </button>
+        </div>
+      </Header>
       <Center>
         <div>
           {userInfo.status === 0 && (

@@ -5,6 +5,7 @@ import {
 } from 'firebase/auth';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import { auth } from '../firebaseApp';
 
 export function Login() {
@@ -26,5 +27,17 @@ export function Login() {
     );
   };
 
-  return <button onClick={onClick}>Sign in with Google</button>;
+  return (
+    <Container>
+      <button onClick={onClick}>Sign in with Google</button>
+    </Container>
+  );
 }
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 500px;
+`;
