@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { client } from './client';
 import { Counter } from './components/Counter';
 import { auth } from './firebaseApp';
-import { Planet } from './types/Planet';
 import { usePlanets } from './usePlanets';
 import { useUserData } from './useUserData';
 import { getDateString } from './utils/getDateString';
 import styled from 'styled-components';
+import Select from 'react-select';
 
 interface Props {
   user: User;
@@ -35,7 +35,7 @@ const FlexContainer = styled.div`
 `;
 
 export function Game({ user }: Props) {
-  const [selectedPlanet, setSelectedPlanet] = useState<Planet>();
+  const [selectedPlanet, setSelectedPlanet] = useState<number | ''>('');
 
   const {
     userInfo,
@@ -65,6 +65,17 @@ export function Game({ user }: Props) {
     ? new Date(userInfo.landingTime).getTime() -
       new Date(userInfo.serverTime).getTime()
     : undefined;
+
+  const options = planets
+    ?.filter((planet) => planet.id !== userInfo.planet.id)
+    ?.map((planet) => ({
+      value: planet.id,
+      label: planet.name,
+    }));
+
+  const selectedOption = options?.find(
+    (option) => option.value === selectedPlanet,
+  );
 
   return (
     <div className="App">
@@ -162,44 +173,35 @@ export function Game({ user }: Props) {
           </Section>
           <FlexContainer>
             {planets && (
-              <select
-                onChange={(e) => {
-                  setSelectedPlanet(
-                    planets.find(
-                      (planet) => planet.id === Number(e.target.value),
-                    ),
-                  );
-                }}
-                defaultValue=""
-              >
-                <option
-                  value=""
-                  disabled
-                >
-                  Select a destination
-                </option>
-                {planets.map((planet) => (
-                  <option
-                    key={planet.id}
-                    value={planet.id}
-                    disabled={userInfo.planet.id === planet.id}
-                  >
-                    {planet.name}
-                  </option>
-                ))}
-              </select>
+              <>
+                <Select
+                  placeholder="Select a Destination"
+                  options={options}
+                  onChange={(e) => {
+                    setSelectedPlanet(e?.value ?? '');
+                  }}
+                  value={selectedOption ?? null}
+                ></Select>
+              </>
             )}
             {selectedPlanet && (
               <div>
                 <button
                   onClick={() => {
                     client
-                      .updateTravelingTo(selectedPlanet.id)
-                      .then(async () => await invalidateUserInfo())
+                      .updateTravelingTo(selectedPlanet)
+                      .then(async () => {
+                        await invalidateUserInfo();
+                        setSelectedPlanet('');
+                      })
                       .catch((e) => console.error(e));
                   }}
                 >
-                  Go to {selectedPlanet.name}
+                  Go to{' '}
+                  {
+                    planets?.find((planet) => planet.id === selectedPlanet)
+                      ?.name
+                  }
                 </button>
               </div>
             )}
