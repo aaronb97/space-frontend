@@ -1,9 +1,10 @@
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { useNavigate } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { auth } from './firebaseApp';
 import { Game } from './Game';
+import { Items } from './routes/items';
 
 const queryClient = new QueryClient();
 
@@ -25,11 +26,16 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="App">
-        <header className="App-header">
-          {user ? <Game user={user} /> : 'Loading...'}
-        </header>
-      </div>
+      <Routes>
+        <Route
+          path="/"
+          element={user ? <Game user={user} /> : 'Loading...'}
+        ></Route>
+        <Route
+          path="/items"
+          element={user ? <Items user={user} /> : 'Loading...'}
+        ></Route>
+      </Routes>
     </QueryClientProvider>
   );
 }

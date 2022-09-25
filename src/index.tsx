@@ -13,12 +13,12 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route
-          path="/"
-          element={<App />}
-        ></Route>
-        <Route
           path="/login"
           element={<Login />}
+        ></Route>
+        <Route
+          path="/*"
+          element={<App />}
         ></Route>
       </Routes>
     </BrowserRouter>
