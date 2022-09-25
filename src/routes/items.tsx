@@ -1,4 +1,5 @@
 import { User } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useUserData } from '../useUserData';
 
@@ -8,9 +9,19 @@ interface Props {
 
 export function Items({ user }: Props) {
   const { userInfo } = useUserData(user);
+  const navigate = useNavigate();
 
   return (
     <div>
+      <div>
+        <button
+          onClick={() => {
+            navigate('/');
+          }}
+        >
+          Go back
+        </button>
+      </div>
       Items:
       {userInfo?.items?.map((item) => (
         <ItemDisplay

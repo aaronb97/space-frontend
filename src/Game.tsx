@@ -8,6 +8,7 @@ import { useUserData } from './useUserData';
 import { getDateString } from './utils/getDateString';
 import styled from 'styled-components';
 import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   user: User;
@@ -36,6 +37,7 @@ const FlexContainer = styled.div`
 
 export function Game({ user }: Props) {
   const [selectedPlanet, setSelectedPlanet] = useState<number | ''>('');
+  const navigate = useNavigate();
 
   const {
     userInfo,
@@ -90,6 +92,13 @@ export function Game({ user }: Props) {
           Sign Out
         </button>
       </div>
+      <button
+        onClick={() => {
+          navigate('/items');
+        }}
+      >
+        Go to Items
+      </button>
       <Center>
         <div>
           {userInfo.status === 0 && (
