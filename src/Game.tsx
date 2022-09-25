@@ -186,6 +186,7 @@ export function Game({ user }: Props) {
                 <Select
                   placeholder="Select a Destination"
                   options={options}
+                  isSearchable={false}
                   onChange={(e) => {
                     setSelectedPlanet(e?.value ?? '');
                   }}
