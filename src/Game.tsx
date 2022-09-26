@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import { logError } from './logError';
+import { calculateDist } from './calculateDist';
 
 interface Props {
   user: User;
@@ -101,6 +102,10 @@ export function Game({ user }: Props) {
     ? new Date(userInfo.landingTime).getTime() -
       new Date(userInfo.serverTime).getTime()
     : undefined;
+
+  planets?.sort(
+    (a, b) => calculateDist(userInfo, a) - calculateDist(userInfo, b),
+  );
 
   const options = planets
     ?.filter((planet) => planet.id !== userInfo.planet.id)
