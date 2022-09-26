@@ -1,12 +1,14 @@
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInAnonymously,
   signInWithPopup,
 } from 'firebase/auth';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { auth } from '../firebaseApp';
+import { logError } from '../logError';
 
 const google = new GoogleAuthProvider();
 
@@ -27,9 +29,14 @@ export function Login() {
     signInWithPopup(auth, google).catch((e) => console.error(e));
   };
 
+  const onClickGuest = () => {
+    signInAnonymously(auth).catch(logError);
+  };
+
   return (
     <Container>
       <button onClick={onClickGoogle}>Sign in with Google</button>
+      <button onClick={onClickGuest}>Continue as Guest</button>
     </Container>
   );
 }

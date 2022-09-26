@@ -1,4 +1,9 @@
-import { signOut, User } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  linkWithPopup,
+  signOut,
+  User,
+} from 'firebase/auth';
 import { useState } from 'react';
 import { client } from './client';
 import { Counter } from './components/Counter';
@@ -9,6 +14,7 @@ import { getDateString } from './utils/getDateString';
 import styled from 'styled-components';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
+import { logError } from './logError';
 
 interface Props {
   user: User;
@@ -44,6 +50,8 @@ const Header = styled.header`
 const Footer = styled.footer`
   position: fixed;
   bottom: 8px;
+  display: flex;
+  justify-content: space-between;
 `;
 
 const SignOutButton = () => {
@@ -62,6 +70,8 @@ const SignOutButton = () => {
 export function Game({ user }: Props) {
   const [selectedPlanet, setSelectedPlanet] = useState<number | ''>('');
   const navigate = useNavigate();
+
+  const [isAnonymous, setIsAnonymous] = useState(user.isAnonymous);
 
   const {
     userInfo,
@@ -107,7 +117,13 @@ export function Game({ user }: Props) {
     <div className="App">
       <Header>
         <div>
-          <div>Signed in as {userInfo.username}</div>
+          {isAnonymous ? (
+            <div>Signed in as Guest ({userInfo.username})</div>
+          ) : (
+            <>
+              <div>Signed in as {userInfo.username}</div>
+            </>
+          )}
         </div>
         <div>
           <button
@@ -261,7 +277,18 @@ export function Game({ user }: Props) {
         </div>
       </Center>
       <Footer>
-        <SignOutButton />
+        {!isAnonymous && <SignOutButton />}
+        {isAnonymous && (
+          <button
+            onClick={() => {
+              linkWithPopup(user, new GoogleAuthProvider())
+                .then((cred) => setIsAnonymous(cred.user.isAnonymous))
+                .catch(logError);
+            }}
+          >
+            Sign In to save your progress!
+          </button>
+        )}
       </Footer>
     </div>
   );
