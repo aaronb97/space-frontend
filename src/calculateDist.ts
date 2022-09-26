@@ -7,9 +7,9 @@ interface PositionLike {
 const square = (num: number) => Math.pow(num, 2);
 
 export const calculateDist = (a: PositionLike, b: PositionLike) => {
-  return (
+  return Math.sqrt(
     square(b.positionX - a.positionX) +
-    square(b.positionY - a.positionY) +
-    square(b.positionZ - a.positionZ)
+      square(b.positionY - a.positionY) +
+      square(b.positionZ - a.positionZ),
   );
 };

@@ -16,6 +16,7 @@ import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import { logError } from './logError';
 import { calculateDist } from './calculateDist';
+import { formatDistance } from './utils/formatDistance';
 
 interface Props {
   user: User;
@@ -103,16 +104,15 @@ export function Game({ user }: Props) {
       new Date(userInfo.serverTime).getTime()
     : undefined;
 
-  planets?.sort(
-    (a, b) => calculateDist(userInfo, a) - calculateDist(userInfo, b),
-  );
-
   const options = planets
     ?.filter((planet) => planet.id !== userInfo.planet.id)
     ?.map((planet) => ({
       value: planet.id,
       label: planet.name,
+      distance: calculateDist(userInfo, planet),
     }));
+
+  options?.sort((a, b) => a.distance - b.distance);
 
   const selectedOption = options?.find(
     (option) => option.value === selectedPlanet,
@@ -232,6 +232,25 @@ export function Game({ user }: Props) {
                     setSelectedPlanet(e?.value ?? '');
                   }}
                   value={selectedOption ?? null}
+                  styles={{
+                    menu: (provided) => ({
+                      ...provided,
+                      alignSelf: 'center',
+                      width: 'max-content',
+                    }),
+                  }}
+                  formatOptionLabel={(option, { context }) => {
+                    if (context === 'value') {
+                      return option.label;
+                    }
+
+                    return (
+                      <>
+                        <div>{option.label}</div>
+                        <div>{formatDistance(option.distance)}</div>
+                      </>
+                    );
+                  }}
                   theme={(theme) => ({
                     ...theme,
                     colors: {
