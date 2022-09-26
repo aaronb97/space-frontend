@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { auth } from '../firebaseApp';
 
+const google = new GoogleAuthProvider();
+
 export function Login() {
   const navigate = useNavigate();
 
@@ -21,15 +23,13 @@ export function Login() {
     return () => unsubscribe();
   }, [navigate]);
 
-  const onClick = () => {
-    signInWithPopup(auth, new GoogleAuthProvider()).catch((e) =>
-      console.error(e),
-    );
+  const onClickGoogle = () => {
+    signInWithPopup(auth, google).catch((e) => console.error(e));
   };
 
   return (
     <Container>
-      <button onClick={onClick}>Sign in with Google</button>
+      <button onClick={onClickGoogle}>Sign in with Google</button>
     </Container>
   );
 }
@@ -39,5 +39,6 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   height: 500px;
 `;
