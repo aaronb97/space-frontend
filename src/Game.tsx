@@ -169,23 +169,25 @@ export function Game({ user }: Props) {
             </div>
           </Section>
           <Section>
-            {userInfo.status === 0 && !userInfo.speedBoostAvailable && (
-              <div>
-                {'Next Boost: '}
-                <Counter
-                  decrement
-                  initialValue={nextBoost / 1000}
-                  render={(time) =>
-                    time <= 0
-                      ? 'Speed Boost available shortly...'
-                      : getDateString(time)
-                  }
-                  onReachZero={() => {
-                    void invalidateUserInfo();
-                  }}
-                ></Counter>
-              </div>
-            )}
+            {userInfo.status === 0 &&
+              !userInfo.speedBoostAvailable &&
+              nextBoost < (landingTime ?? Infinity) && (
+                <div>
+                  {'Next Boost: '}
+                  <Counter
+                    decrement
+                    initialValue={nextBoost / 1000}
+                    render={(time) =>
+                      time <= 0
+                        ? 'Speed Boost available shortly...'
+                        : getDateString(time)
+                    }
+                    onReachZero={() => {
+                      void invalidateUserInfo();
+                    }}
+                  ></Counter>
+                </div>
+              )}
             {userInfo.speedBoostAvailable && (
               <Section>
                 <FlexContainer>
