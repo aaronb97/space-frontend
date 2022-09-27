@@ -1,0 +1,16 @@
+.notification {
+  color: yellow;
+  position: relative;
+  transition: 5s;
+}
+
+.show {
+  top: 10px;
+  opacity: 100;
+}
+
+.hide {
+  top: 50px;
+  opacity: 0;
+  visibility: hidden;
+}

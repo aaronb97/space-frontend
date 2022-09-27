@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { logError } from './logError';
 import { calculateDist } from './calculateDist';
 import { formatDistance } from './utils/formatDistance';
+import { Notification } from './Notification';
 
 interface Props {
   user: User;
@@ -74,6 +75,7 @@ export function Game({ user }: Props) {
   const navigate = useNavigate();
 
   const [isAnonymous, setIsAnonymous] = useState(user.isAnonymous);
+  const [notification, setNotification] = useState<string | undefined>('');
 
   const {
     userInfo,
@@ -197,7 +199,15 @@ export function Game({ user }: Props) {
                       onClick={() => {
                         client
                           .speedboost()
-                          .then(async () => await invalidateUserInfo())
+                          .then(async () => {
+                            await invalidateUserInfo();
+                            const { speed } = userInfo;
+                            setNotification(
+                              `Your speed has been boosted from ${speed.toLocaleString()} to ${(
+                                speed * 2
+                              ).toLocaleString()}!`,
+                            );
+                          })
                           .catch((e) => console.error(e));
                       }}
                     >
@@ -301,6 +311,7 @@ export function Game({ user }: Props) {
             )}
           </FlexContainer>
         </div>
+        <Notification text={notification}></Notification>
       </Center>
       <Footer>
         {!isAnonymous && <SignOutButton />}
