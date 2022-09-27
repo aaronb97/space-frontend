@@ -7,6 +7,10 @@ export function getDateString(seconds: number) {
   const days = Math.floor(hours / 24);
   const years = Math.floor(days / 365);
 
+  if (years >= 1000) {
+    return 'More than 1000 years';
+  }
+
   if (years) {
     parts.push(`${years} years`);
   }
