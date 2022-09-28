@@ -47,12 +47,13 @@ const FlexContainer = styled.div`
 const Header = styled.header`
   display: flex;
   justify-content: space-between;
-  margin: 8px;
+  margin: 16px;
 `;
 
 const Footer = styled.footer`
   position: fixed;
-  bottom: 8px;
+  padding-left: 16px;
+  bottom: 16px;
   display: flex;
   justify-content: space-between;
 `;

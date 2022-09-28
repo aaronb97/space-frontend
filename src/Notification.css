@@ -1,7 +1,12 @@
 .notification {
   color: yellow;
   position: relative;
-  transition: 5s;
+  transition-property: top, opacity, visibility;
+  transition-duration: 5s;
+  text-align: center;
+  padding-top: 16px;
+  padding-left: 64px;
+  padding-right: 64px;
 }
 
 .show {
