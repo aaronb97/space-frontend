@@ -1,5 +1,5 @@
 import { User } from 'firebase/auth';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { client } from '../client';
 
@@ -16,14 +16,16 @@ export const useUserData = (user: User) => {
     },
   );
 
-  const invalidate = async () =>
-    await queryClient.invalidateQueries(['userInfo', user.uid]);
+  const invalidate = useCallback(
+    async () => await queryClient.invalidateQueries(['userInfo', user.uid]),
+    [queryClient, user.uid],
+  );
 
   useEffect(() => {
     return () => {
       void invalidate();
     };
-  }, []);
+  }, [invalidate]);
 
   return {
     userInfo: userInfoData?.data,

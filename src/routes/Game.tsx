@@ -12,12 +12,10 @@ import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import { getDateString } from '../utils/getDateString';
 import styled from 'styled-components';
-import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import { logError } from '../utils/logError';
-import { calculateDist } from '../utils/calculateDist';
-import { formatDistance } from '../utils/formatDistance';
 import { Notification } from '../components/Notification';
+import { DestinationPicker } from '../components/DestinationPicker';
 
 interface Props {
   user: User;
@@ -112,20 +110,6 @@ export function Game({ user }: Props) {
     ? new Date(userInfo.landingTime).getTime() -
       new Date(userInfo.serverTime).getTime()
     : undefined;
-
-  const options = planets
-    ?.filter((planet) => planet.id !== userInfo.planet.id)
-    ?.map((planet) => ({
-      value: planet.id,
-      label: planet.name,
-      distance: calculateDist(userInfo, planet),
-    }));
-
-  options?.sort((a, b) => a.distance - b.distance);
-
-  const selectedOption = options?.find(
-    (option) => option.value === selectedPlanet,
-  );
 
   return (
     <div className="App">
@@ -236,58 +220,12 @@ export function Game({ user }: Props) {
           </Section>
           <FlexContainer>
             {planets && (
-              <>
-                <Select
-                  placeholder="Select a Destination"
-                  options={options}
-                  isSearchable={false}
-                  onChange={(e) => {
-                    setSelectedPlanet(e?.value ?? '');
-                  }}
-                  value={selectedOption ?? null}
-                  styles={{
-                    menu: (provided) => ({
-                      ...provided,
-                      alignSelf: 'center',
-                      width: 'max-content',
-                    }),
-                  }}
-                  formatOptionLabel={(option, { context }) => {
-                    if (context === 'value') {
-                      return option.label;
-                    }
-
-                    return (
-                      <>
-                        <div>{option.label}</div>
-                        <div>{formatDistance(option.distance)}</div>
-                      </>
-                    );
-                  }}
-                  theme={(theme) => ({
-                    ...theme,
-                    colors: {
-                      ...theme.colors,
-                      text: 'white',
-                      neutral0: 'hsl(0, 0%, 10%)',
-                      neutral5: 'hsl(0, 0%, 20%)',
-                      neutral10: 'hsl(0, 0%, 30%)',
-                      neutral20: 'hsl(0, 0%, 40%)',
-                      neutral30: 'hsl(0, 0%, 50%)',
-                      neutral40: 'hsl(0, 0%, 60%)',
-                      neutral50: 'hsl(0, 0%, 70%)',
-                      neutral60: 'hsl(0, 0%, 80%)',
-                      neutral70: 'hsl(0, 0%, 90%)',
-                      neutral80: 'hsl(0, 0%, 95%)',
-                      neutral90: 'hsl(0, 0%, 100%)',
-                      primary: '#444',
-                      primary25: '#444',
-                      primary50: '#444',
-                      primary75: '#444',
-                    },
-                  })}
-                ></Select>
-              </>
+              <DestinationPicker
+                planets={planets}
+                selectedPlanet={selectedPlanet}
+                userInfo={userInfo}
+                onChange={(option) => setSelectedPlanet(option?.value ?? '')}
+              ></DestinationPicker>
             )}
             {selectedPlanet && (
               <div>
