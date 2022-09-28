@@ -7,8 +7,8 @@ import {
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { auth } from '../firebaseApp';
-import { logError } from '../logError';
+import { auth } from '../firebase/firebaseApp';
+import { logError } from '../utils/logError';
 
 const google = new GoogleAuthProvider();
 

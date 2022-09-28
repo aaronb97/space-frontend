@@ -2,8 +2,8 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { auth } from './firebaseApp';
-import { Game } from './Game';
+import { auth } from './firebase/firebaseApp';
+import { Game } from './routes/Game';
 import { Items } from './routes/items';
 
 const queryClient = new QueryClient();

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { User } from 'firebase/auth';
-import { auth } from './firebaseApp';
+import { auth } from './firebase/firebaseApp';
 import { Planet } from './types/Planet';
 import { UserData } from './types/UserData';
 

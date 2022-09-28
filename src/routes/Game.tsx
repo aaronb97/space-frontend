@@ -5,19 +5,19 @@ import {
   User,
 } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-import { client } from './client';
-import { Counter } from './components/Counter';
-import { auth } from './firebaseApp';
-import { usePlanets } from './usePlanets';
-import { useUserData } from './useUserData';
-import { getDateString } from './utils/getDateString';
+import { client } from '../client';
+import { Counter } from '../components/Counter';
+import { auth } from '../firebase/firebaseApp';
+import { usePlanets } from '../hooks/usePlanets';
+import { useUserData } from '../hooks/useUserData';
+import { getDateString } from '../utils/getDateString';
 import styled from 'styled-components';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
-import { logError } from './logError';
-import { calculateDist } from './calculateDist';
-import { formatDistance } from './utils/formatDistance';
-import { Notification } from './Notification';
+import { logError } from '../utils/logError';
+import { calculateDist } from '../utils/calculateDist';
+import { formatDistance } from '../utils/formatDistance';
+import { Notification } from '../components/Notification';
 
 interface Props {
   user: User;

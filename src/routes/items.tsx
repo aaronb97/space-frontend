@@ -1,7 +1,7 @@
 import { User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useUserData } from '../useUserData';
+import { useUserData } from '../hooks/useUserData';
 
 interface Props {
   user: User;

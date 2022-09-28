@@ -1,7 +1,7 @@
 import { User } from 'firebase/auth';
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
-import { client } from './client';
+import { client } from '../client';
 
 export const useUserData = (user: User) => {
   const queryClient = useQueryClient();

@@ -1,5 +1,5 @@
 import { useQuery } from 'react-query';
-import { client } from './client';
+import { client } from '../client';
 
 export const usePlanets = () => {
   const { data, error } = useQuery(
