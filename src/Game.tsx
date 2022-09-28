@@ -4,7 +4,7 @@ import {
   signOut,
   User,
 } from 'firebase/auth';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { client } from './client';
 import { Counter } from './components/Counter';
 import { auth } from './firebaseApp';
@@ -83,6 +83,12 @@ export function Game({ user }: Props) {
     error: userError,
   } = useUserData(user);
   const { planets, error: planetsError } = usePlanets();
+
+  useEffect(() => {
+    if (userInfo?.notification) {
+      setNotification(userInfo.notification);
+    }
+  }, [userInfo?.notification]);
 
   if (userError || planetsError) {
     return (
