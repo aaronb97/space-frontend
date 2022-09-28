@@ -211,7 +211,7 @@ export function Game({ user }: Props) {
                           .catch((e) => console.error(e));
                       }}
                     >
-                      Speed boost
+                      Speed Boost
                     </button>
                   </div>
                 </FlexContainer>
