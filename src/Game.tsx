@@ -207,12 +207,6 @@ export function Game({ user }: Props) {
                           .speedboost()
                           .then(async () => {
                             await invalidateUserInfo();
-                            const { speed } = userInfo;
-                            setNotification(
-                              `Your speed has been boosted from ${speed.toLocaleString()} to ${(
-                                speed * 2
-                              ).toLocaleString()}!`,
-                            );
                           })
                           .catch((e) => console.error(e));
                       }}
