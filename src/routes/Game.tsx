@@ -121,7 +121,7 @@ export function Game({ user }: Props) {
   return (
     <>
       <Visualizer user={user} />
-      <div className="App">
+      <>
         <Header>
           <div>
             {isAnonymous ? (
@@ -275,7 +275,7 @@ export function Game({ user }: Props) {
             </button>
           )}
         </Footer>
-      </div>
+      </>
     </>
   );
 }
