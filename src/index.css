@@ -1,6 +1,12 @@
+@import url('https://fonts.googleapis.com/css?family=PT+Serif');
+
 :root {
   background: #111111;
   color: white;
+}
+
+body {
+  font-family: 'PT Serif';
 }
 
 button {
