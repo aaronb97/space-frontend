@@ -38,7 +38,7 @@ function App() {
         ></Route>
         <Route
           path="/visualizer"
-          element={user ? <Visualizer /> : 'Loading...'}
+          element={user ? <Visualizer user={user} /> : 'Loading...'}
         ></Route>
       </Routes>
     </QueryClientProvider>
