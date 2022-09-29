@@ -31,6 +31,9 @@ export const DestinationPicker = ({
         value: planet.id,
         label: planet.name,
         distance: calculateDist(userInfo, planet),
+        visited: userInfo.visitedPlanets.some(
+          (visitedPlanet) => visitedPlanet.id === planet.id,
+        ),
       }))
       .sort((a, b) => a.distance - b.distance);
   }, [planets, userInfo]);
@@ -60,7 +63,9 @@ export const DestinationPicker = ({
 
         return (
           <>
-            <div>{option.label}</div>
+            <div>
+              {option.label} {option.visited ? '✓' : ''}
+            </div>
             <div>{formatDistance(option.distance)}</div>
           </>
         );

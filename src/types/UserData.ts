@@ -22,4 +22,5 @@ export interface UserData {
   notification?: string;
 
   planet: Planet;
+  visitedPlanets: Planet[];
 }
