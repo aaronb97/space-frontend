@@ -6,6 +6,7 @@ import SpriteText from 'three-spritetext';
 import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import { User } from 'firebase/auth';
+import { Vector3 } from 'three';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -15,7 +16,7 @@ const camera = new THREE.PerspectiveCamera(
   5000,
 );
 
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 camera.position.z = 10;
@@ -53,24 +54,32 @@ const Visualizer = ({ user }: Props) => {
 
   useEffect(() => {
     if (planets?.length && userInfo) {
-      const userText = new SpriteText(userInfo?.username);
+      const userText = new SpriteText(userInfo?.username, 0.1);
       userText.position.x = userInfo?.positionX / factor;
       userText.position.y = userInfo?.positionY / factor;
       userText.position.z = userInfo?.positionZ / factor;
 
       scene.add(userText);
+      controls.target.set(
+        userText.position.x,
+        userText.position.y,
+        userText.position.z,
+      );
 
       for (const planet of planets) {
-        const text = new SpriteText(planet.name);
-        // const { positionX: x, positionY: y, positionZ: z } = planet;
         const x = planet.positionX / factor;
         const y = planet.positionY / factor;
         const z = planet.positionZ / factor;
-        text.position.x = x;
-        text.position.y = y;
-        text.position.z = z;
+        const geometry = new THREE.SphereGeometry(0.1, 32, 16);
+        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
 
-        scene.add(text);
+        sphere.position.x = x;
+        sphere.position.y = y;
+        sphere.position.z = z;
+
+        scene.add(sphere);
 
         const g = new THREE.BufferGeometry().setFromPoints(
           new THREE.Path()
@@ -86,6 +95,14 @@ const Visualizer = ({ user }: Props) => {
         );
         const m = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
         const l = new THREE.Line(g, m);
+        l.rotateY(
+          // this is bogus
+          new Vector3(
+            planet.positionX,
+            planet.positionY,
+            planet.positionZ,
+          ).angleTo(new Vector3(planet.positionX, planet.positionY, 0)),
+        );
         scene.add(l);
       }
     }

@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { logError } from '../utils/logError';
 import { Notification } from '../components/Notification';
 import { DestinationPicker } from '../components/DestinationPicker';
+import Visualizer from './Visualizer';
 
 interface Props {
   user: User;
@@ -54,6 +55,12 @@ const Footer = styled.footer`
   bottom: 16px;
   display: flex;
   justify-content: space-between;
+`;
+
+const InfoDisplay = styled.div`
+  padding: 16px;
+  background-color: rgba(0, 0, 0, 0.7);
+  box-shadow: 0px 0px px rgba(0, 0, 0, 0.7) inset;
 `;
 
 const SignOutButton = () => {
@@ -112,68 +119,106 @@ export function Game({ user }: Props) {
     : undefined;
 
   return (
-    <div className="App">
-      <Header>
-        <div>
-          {isAnonymous ? (
-            <div>Signed in as Guest ({userInfo.username})</div>
-          ) : (
-            <>
-              <div>Signed in as {userInfo.username}</div>
-            </>
-          )}
-        </div>
-        <div>
-          <button
-            onClick={() => {
-              navigate('/items');
-            }}
-          >
-            Go to Items
-          </button>
-        </div>
-      </Header>
-      <Center>
-        <div>
-          {userInfo.status === 0 && (
-            <div>Traveling to {userInfo.planet.name}</div>
-          )}
-          {userInfo.status === 1 && (
-            <div>Welcome to {userInfo.planet.name}</div>
-          )}
-          <Section>
-            <div>Speed: {userInfo.speed.toLocaleString()} km/hour</div>
-            <div>
-              {'Coordinates: '}
-              <PositionCounter
-                position={userInfo.positionX}
-                velocity={userInfo.velocityX}
-              />
-              {', '}
-              <PositionCounter
-                position={userInfo.positionY}
-                velocity={userInfo.velocityY}
-              />
-              {', '}
-              <PositionCounter
-                position={userInfo.positionZ}
-                velocity={userInfo.velocityZ}
-              />
-            </div>
-          </Section>
-          <Section>
-            {userInfo.status === 0 &&
-              !userInfo.speedBoostAvailable &&
-              nextBoost < (landingTime ?? Infinity) && (
+    <>
+      <Visualizer user={user} />
+      <div className="App">
+        <Header>
+          <div>
+            {isAnonymous ? (
+              <div>Signed in as Guest ({userInfo.username})</div>
+            ) : (
+              <>
+                <div>Signed in as {userInfo.username}</div>
+              </>
+            )}
+          </div>
+          <div>
+            <button
+              onClick={() => {
+                navigate('/items');
+              }}
+            >
+              Go to Items
+            </button>
+          </div>
+        </Header>
+        <Center>
+          <InfoDisplay>
+            {userInfo.status === 0 && (
+              <div>Traveling to {userInfo.planet.name}</div>
+            )}
+            {userInfo.status === 1 && (
+              <div>Welcome to {userInfo.planet.name}</div>
+            )}
+            <Section>
+              <div>Speed: {userInfo.speed.toLocaleString()} km/hour</div>
+              <div>
+                {'Coordinates: '}
+                <PositionCounter
+                  position={userInfo.positionX}
+                  velocity={userInfo.velocityX}
+                />
+                {', '}
+                <PositionCounter
+                  position={userInfo.positionY}
+                  velocity={userInfo.velocityY}
+                />
+                {', '}
+                <PositionCounter
+                  position={userInfo.positionZ}
+                  velocity={userInfo.velocityZ}
+                />
+              </div>
+            </Section>
+            <Section>
+              {userInfo.status === 0 &&
+                !userInfo.speedBoostAvailable &&
+                nextBoost < (landingTime ?? Infinity) && (
+                  <div>
+                    {'Next Boost: '}
+                    <Counter
+                      decrement
+                      initialValue={nextBoost / 1000}
+                      render={(time) =>
+                        time <= 0
+                          ? 'Speed Boost available shortly...'
+                          : getDateString(time)
+                      }
+                      onReachZero={() => {
+                        void invalidateUserInfo();
+                      }}
+                    ></Counter>
+                  </div>
+                )}
+              {userInfo.speedBoostAvailable && (
+                <Section>
+                  <FlexContainer>
+                    <div>You have an available Speed Boost!</div>
+                    <div>
+                      <button
+                        onClick={() => {
+                          client
+                            .speedboost()
+                            .then(async () => {
+                              await invalidateUserInfo();
+                            })
+                            .catch((e) => console.error(e));
+                        }}
+                      >
+                        Speed Boost
+                      </button>
+                    </div>
+                  </FlexContainer>
+                </Section>
+              )}
+              {landingTime && (
                 <div>
-                  {'Next Boost: '}
+                  {'Landing: '}
                   <Counter
                     decrement
-                    initialValue={nextBoost / 1000}
+                    initialValue={landingTime / 1000}
                     render={(time) =>
-                      time <= 0
-                        ? 'Speed Boost available shortly...'
-                        : getDateString(time)
+                      time <= 1 ? 'Soon...' : getDateString(time)
                     }
                     onReachZero={() => {
                       void invalidateUserInfo();
@@ -181,92 +226,57 @@ export function Game({ user }: Props) {
                   ></Counter>
                 </div>
               )}
-            {userInfo.speedBoostAvailable && (
-              <Section>
-                <FlexContainer>
-                  <div>You have an available Speed Boost!</div>
-                  <div>
-                    <button
-                      onClick={() => {
-                        client
-                          .speedboost()
-                          .then(async () => {
-                            await invalidateUserInfo();
-                          })
-                          .catch((e) => console.error(e));
-                      }}
-                    >
-                      Speed Boost
-                    </button>
-                  </div>
-                </FlexContainer>
-              </Section>
-            )}
-            {landingTime && (
-              <div>
-                {'Landing: '}
-                <Counter
-                  decrement
-                  initialValue={landingTime / 1000}
-                  render={(time) =>
-                    time <= 1 ? 'Soon...' : getDateString(time)
-                  }
-                  onReachZero={() => {
-                    void invalidateUserInfo();
-                  }}
-                ></Counter>
-              </div>
-            )}
-          </Section>
-          <FlexContainer>
-            {planets && (
-              <DestinationPicker
-                planets={planets}
-                selectedPlanet={selectedPlanet}
-                userInfo={userInfo}
-                onChange={(option) => setSelectedPlanet(option?.value ?? '')}
-              ></DestinationPicker>
-            )}
-            {selectedPlanet && (
-              <div>
-                <button
-                  onClick={() => {
-                    client
-                      .updateTravelingTo(selectedPlanet)
-                      .then(async () => {
-                        await invalidateUserInfo();
-                        setSelectedPlanet('');
-                      })
-                      .catch((e) => console.error(e));
-                  }}
-                >
-                  Go to{' '}
-                  {
-                    planets?.find((planet) => planet.id === selectedPlanet)
-                      ?.name
-                  }
-                </button>
-              </div>
-            )}
-          </FlexContainer>
-        </div>
-        <Notification text={notification}></Notification>
-      </Center>
-      <Footer>
-        {!isAnonymous && <SignOutButton />}
-        {isAnonymous && (
-          <button
-            onClick={() => {
-              linkWithPopup(user, new GoogleAuthProvider())
-                .then((cred) => setIsAnonymous(cred.user.isAnonymous))
-                .catch(logError);
-            }}
-          >
-            Sign In to save your progress!
-          </button>
-        )}
-      </Footer>
-    </div>
+            </Section>
+            <FlexContainer>
+              {planets && (
+                <DestinationPicker
+                  planets={planets}
+                  selectedPlanet={selectedPlanet}
+                  userInfo={userInfo}
+                  onChange={(option) => setSelectedPlanet(option?.value ?? '')}
+                ></DestinationPicker>
+              )}
+              {selectedPlanet && (
+                <div>
+                  <button
+                    onClick={() => {
+                      client
+                        .updateTravelingTo(selectedPlanet)
+                        .then(async () => {
+                          await invalidateUserInfo();
+                          setSelectedPlanet('');
+                        })
+                        .catch((e) => console.error(e));
+                    }}
+                  >
+                    Go to{' '}
+                    {
+                      planets?.find((planet) => planet.id === selectedPlanet)
+                        ?.name
+                    }
+                  </button>
+                </div>
+              )}
+            </FlexContainer>
+          </InfoDisplay>
+          <Notification text={notification}></Notification>
+        </Center>
+        <Footer>
+          {!isAnonymous && <SignOutButton />}
+          {isAnonymous && (
+            <button
+              onClick={() => {
+                linkWithPopup(user, new GoogleAuthProvider())
+                  .then((cred) => setIsAnonymous(cred.user.isAnonymous))
+                  .catch(logError);
+              }}
+            >
+              Sign In to save your progress!
+            </button>
+          )}
+        </Footer>
+      </div>
+    </>
   );
 }
 

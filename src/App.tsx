@@ -5,7 +5,6 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import { auth } from './firebase/firebaseApp';
 import { Game } from './routes/Game';
 import { Items } from './routes/items';
-const Visualizer = React.lazy(async () => await import('./routes/Visualizer'));
 
 const queryClient = new QueryClient();
 
@@ -35,10 +34,6 @@ function App() {
         <Route
           path="/items"
           element={user ? <Items user={user} /> : 'Loading...'}
-        ></Route>
-        <Route
-          path="/visualizer"
-          element={user ? <Visualizer user={user} /> : 'Loading...'}
         ></Route>
       </Routes>
     </QueryClientProvider>
