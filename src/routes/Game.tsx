@@ -60,7 +60,8 @@ const Footer = styled.footer`
 const InfoDisplay = styled.div`
   padding: 16px;
   background-color: rgba(0, 0, 0, 0.7);
-  box-shadow: 0px 0px px rgba(0, 0, 0, 0.7) inset;
+  box-shadow: 1px 1px 1px 1px rgba(255, 255, 255, 0.16),
+    1px 1px 1px 1px rgba(255, 255, 255, 0.23);
 `;
 
 const SignOutButton = () => {
