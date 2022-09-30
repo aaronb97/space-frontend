@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import SpriteText from 'three-spritetext';
 import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
@@ -13,12 +14,14 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
-  0.01,
+  0.001,
   50000,
 );
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+
+const loader = new OBJLoader();
 
 camera.position.z = 10;
 
@@ -39,6 +42,8 @@ const sqr = (num: number) => Math.pow(num, 2);
 const spheres: Array<
   THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>
 > = [];
+
+const objects: THREE.Group[] = [];
 
 const Visualizer = ({ user }: Props) => {
   const { planets } = usePlanets();
@@ -76,6 +81,20 @@ const Visualizer = ({ user }: Props) => {
       userText.position.x = x;
       userText.position.y = y;
       userText.position.z = z;
+
+      loader.load('Rocket.obj', (obj) => {
+        scene.add(obj);
+        objects.push(obj);
+        obj.position.x = x;
+        obj.position.y = y;
+        obj.position.z = z;
+        const scale = 0.001;
+        obj.scale.set(scale, scale, scale);
+      });
+
+      const light = new THREE.PointLight(0xffffff, 1, 100000);
+      light.position.set(0, 0, 0);
+      scene.add(light);
 
       // scene.add(userText);
       controls.target.set(x, y, z);
