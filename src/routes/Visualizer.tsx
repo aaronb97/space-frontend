@@ -7,6 +7,7 @@ import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import { User } from 'firebase/auth';
 import { Vector3 } from 'three';
+import { calculateDist } from '../utils/calculateDist';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -78,6 +79,25 @@ const Visualizer = ({ user }: Props) => {
 
       // scene.add(userText);
       controls.target.set(x, y, z);
+      const distance = Math.max(
+        calculateDist(userInfo, userInfo.planet) / factor,
+        2,
+      );
+
+      const [xRand, yRand, zRand] = [
+        Math.random() - 0.5,
+        Math.random() - 0.5,
+        Math.random() - 0.5,
+      ];
+      const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
+      const [xNorm, yNorm, zNorm] = [
+        xRand * normal,
+        yRand * normal,
+        zRand * normal,
+      ];
+      camera.position.x = userInfo.positionX / factor + distance * xNorm;
+      camera.position.y = userInfo.positionY / factor + distance * yNorm;
+      camera.position.z = userInfo.positionZ / factor + distance * zNorm;
 
       for (const planet of planets) {
         const x = planet.positionX / factor;
@@ -95,8 +115,6 @@ const Visualizer = ({ user }: Props) => {
         sphere.position.z = z;
 
         scene.add(sphere);
-
-        console.log(planet.orbiting);
 
         // const text = new SpriteText(planet.name);
         // text.position.x = x;
