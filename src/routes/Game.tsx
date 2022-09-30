@@ -152,23 +152,6 @@ export function Game({ user }: Props) {
             )}
             <Section>
               <div>Speed: {userInfo.speed.toLocaleString()} km/hour</div>
-              <div>
-                {'Coordinates: '}
-                <PositionCounter
-                  position={userInfo.positionX}
-                  velocity={userInfo.velocityX}
-                />
-                {', '}
-                <PositionCounter
-                  position={userInfo.positionY}
-                  velocity={userInfo.velocityY}
-                />
-                {', '}
-                <PositionCounter
-                  position={userInfo.positionZ}
-                  velocity={userInfo.velocityZ}
-                />
-              </div>
             </Section>
             <Section>
               {userInfo.status === 0 &&
@@ -279,23 +262,3 @@ export function Game({ user }: Props) {
     </>
   );
 }
-
-interface PositionCounterProps {
-  velocity: number;
-  position: number;
-}
-
-const PositionCounter = ({ velocity, position }: PositionCounterProps) => {
-  if (velocity === 0) {
-    return <>{position.toFixed()}</>;
-  }
-
-  return (
-    <Counter
-      decrement={velocity < 0}
-      initialValue={position}
-      render={(position) => position.toFixed()}
-      interval={Math.abs((1 / velocity) * 60 * 60 * 1000)}
-    ></Counter>
-  );
-};
