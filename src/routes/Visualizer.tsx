@@ -12,8 +12,8 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
-  0.1,
-  5000,
+  0.01,
+  50000,
 );
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -27,11 +27,17 @@ controls.dampingFactor = 0.25;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.1;
 
-const factor = 10000000;
+const factor = 1000000;
 
 interface Props {
   user: User;
 }
+
+const sqr = (num: number) => Math.pow(num, 2);
+
+const spheres: Array<
+  THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>
+> = [];
 
 const Visualizer = ({ user }: Props) => {
   const { planets } = usePlanets();
@@ -46,6 +52,14 @@ const Visualizer = ({ user }: Props) => {
 
         renderer.render(scene, camera);
 
+        spheres.forEach((sphere) => {
+          const distance = camera.position.distanceTo(sphere.position);
+
+          const scaleFactor = Math.max(distance, 1);
+
+          sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        });
+
         controls.update();
       };
       animate();
@@ -55,25 +69,26 @@ const Visualizer = ({ user }: Props) => {
   useEffect(() => {
     if (planets?.length && userInfo) {
       const userText = new SpriteText(userInfo?.username, 0.1);
-      userText.position.x = userInfo?.positionX / factor;
-      userText.position.y = userInfo?.positionY / factor;
-      userText.position.z = userInfo?.positionZ / factor;
+      const x = userInfo?.positionX / factor;
+      const y = userInfo?.positionY / factor;
+      const z = userInfo?.positionZ / factor;
+      userText.position.x = x;
+      userText.position.y = y;
+      userText.position.z = z;
 
-      scene.add(userText);
-      controls.target.set(
-        userText.position.x,
-        userText.position.y,
-        userText.position.z,
-      );
+      // scene.add(userText);
+      controls.target.set(x, y, z);
 
       for (const planet of planets) {
         const x = planet.positionX / factor;
         const y = planet.positionY / factor;
         const z = planet.positionZ / factor;
-        const geometry = new THREE.SphereGeometry(0.1, 32, 16);
+        const radius = planet.radius ? planet.radius / factor : 0.005;
+        const geometry = new THREE.SphereGeometry(radius, 32, 16);
         const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const sphere = new THREE.Mesh(geometry, material);
         scene.add(sphere);
+        spheres.push(sphere);
 
         sphere.position.x = x;
         sphere.position.y = y;
@@ -81,17 +96,38 @@ const Visualizer = ({ user }: Props) => {
 
         scene.add(sphere);
 
+        console.log(planet.orbiting);
+
+        // const text = new SpriteText(planet.name);
+        // text.position.x = x;
+        // text.position.y = y;
+        // text.position.z = z + 10;
+        // scene.add(text);
+
+        // if (planet.name.includes('Moon')) {
+        //   // eslint-disable-next-line no-debugger
+        //   debugger;
+        // }
+
+        const orbiting = planet.orbiting;
+        const orbX = (orbiting?.positionX ?? 0) / factor;
+        const orbY = (orbiting?.positionY ?? 0) / factor;
+        const orbZ = (orbiting?.positionZ ?? 0) / factor;
+        const orbitRadius = Math.sqrt(
+          sqr(x - orbX) + sqr(y - orbY) + sqr(z - orbZ),
+        );
+
         const g = new THREE.BufferGeometry().setFromPoints(
           new THREE.Path()
             .absarc(
-              0,
-              0,
-              Math.sqrt(x * x + y * y + z * z),
+              planet.orbiting ? planet.orbiting.positionX / factor : 0,
+              planet.orbiting ? planet.orbiting.positionY / factor : 0,
+              orbitRadius,
               0,
               Math.PI * 2,
               false,
             )
-            .getSpacedPoints(100),
+            .getSpacedPoints(10000),
         );
         const m = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
         const l = new THREE.Line(g, m);

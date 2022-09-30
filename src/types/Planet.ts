@@ -4,4 +4,7 @@ export interface Planet {
   positionX: number;
   positionY: number;
   positionZ: number;
+  radius: number;
+
+  orbiting?: Planet;
 }
