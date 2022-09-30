@@ -17,6 +17,7 @@ import { logError } from '../utils/logError';
 import { Notification } from '../components/Notification';
 import { DestinationPicker } from '../components/DestinationPicker';
 import Visualizer from './Visualizer';
+import './info.css';
 
 interface Props {
   user: User;
@@ -57,11 +58,10 @@ const Footer = styled.footer`
   justify-content: space-between;
 `;
 
-const InfoDisplay = styled.div`
-  padding: 16px;
-  background-color: rgba(0, 0, 0, 0.7);
-  box-shadow: 1px 1px 1px 1px rgba(255, 255, 255, 0.16),
-    1px 1px 1px 1px rgba(255, 255, 255, 0.23);
+const CenterText = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: center;
 `;
 
 const SignOutButton = () => {
@@ -94,6 +94,10 @@ export function Game({ user }: Props) {
   useEffect(() => {
     if (userInfo?.notification) {
       setNotification(userInfo.notification);
+
+      setTimeout(() => {
+        setNotification(undefined);
+      }, 10000);
     }
   }, [userInfo?.notification]);
 
@@ -144,7 +148,7 @@ export function Game({ user }: Props) {
           </div>
         </Header>
         <Center>
-          <InfoDisplay>
+          <div className={`info`}>
             {userInfo.status === 0 && (
               <div>Traveling to {userInfo.planet.name}</div>
             )}
@@ -242,8 +246,10 @@ export function Game({ user }: Props) {
                 </div>
               )}
             </FlexContainer>
-          </InfoDisplay>
-          <Notification text={notification}></Notification>
+            <CenterText>
+              <Notification text={notification}></Notification>
+            </CenterText>
+          </div>
         </Center>
         <Footer>
           {!isAnonymous && <SignOutButton />}

@@ -6,10 +6,12 @@ interface NotificationProps {
 }
 
 export const Notification = (props: NotificationProps) => {
-  const [hide, setHide] = useState(false);
+  const [hide, setHide] = useState(props.text === '');
 
   useEffect(() => {
-    setHide(false);
+    if (props.text) {
+      setHide(false);
+    }
 
     const timer = setTimeout(() => {
       setHide(true);
@@ -17,10 +19,6 @@ export const Notification = (props: NotificationProps) => {
 
     return () => clearTimeout(timer);
   }, [props.text]);
-
-  if (!props.text) {
-    return <div className="hide"></div>;
-  }
 
   return (
     <div className={`notification ${hide ? 'hide' : 'show'}`}>{props.text}</div>
