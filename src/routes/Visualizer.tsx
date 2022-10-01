@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import SpriteText from 'three-spritetext';
 import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import { User } from 'firebase/auth';
@@ -74,13 +73,10 @@ const Visualizer = ({ user }: Props) => {
 
   useEffect(() => {
     if (planets?.length && userInfo) {
-      const userText = new SpriteText(userInfo?.username, 0.1);
+      scene.clear();
       const x = userInfo?.positionX / factor;
       const y = userInfo?.positionY / factor;
       const z = userInfo?.positionZ / factor;
-      userText.position.x = x;
-      userText.position.y = y;
-      userText.position.z = z;
 
       loader.load('Rocket.obj', (obj) => {
         scene.add(obj);
