@@ -9,10 +9,10 @@ import { auth } from '../firebase/firebaseApp';
 import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
 import { logError } from '../utils/logError';
 import Visualizer from './Visualizer';
 import { NavigationPanel } from '../components/NavigationPanel';
+import { ItemsPanel } from '../components/ItemsPanel';
 
 interface Props {
   user: User;
@@ -54,13 +54,15 @@ const SignOutButton = () => {
 };
 
 export function Game({ user }: Props) {
-  const navigate = useNavigate();
-
   const [isAnonymous, setIsAnonymous] = useState(user.isAnonymous);
   const [notification, setNotification] = useState<string | undefined>('');
 
   const { userInfo, error: userError } = useUserData(user);
   const { planets, error: planetsError } = usePlanets();
+
+  const [selectedPanel, setSelectedPanel] = useState<'items' | 'navigation'>(
+    'items',
+  );
 
   useEffect(() => {
     if (userInfo?.notification) {
@@ -99,22 +101,38 @@ export function Game({ user }: Props) {
               </>
             )}
           </div>
-          <div>
-            <button
-              onClick={() => {
-                navigate('/items');
-              }}
-            >
-              Go to Items
-            </button>
-          </div>
+          {selectedPanel !== 'items' && (
+            <div>
+              <button
+                onClick={() => {
+                  setSelectedPanel('items');
+                }}
+              >
+                Items
+              </button>
+            </div>
+          )}
+          {selectedPanel !== 'navigation' && (
+            <div>
+              <button
+                onClick={() => {
+                  setSelectedPanel('navigation');
+                }}
+              >
+                Navigation
+              </button>
+            </div>
+          )}
         </Header>
         <Center>
-          <NavigationPanel
-            userInfo={userInfo}
-            planets={planets}
-            notification={notification}
-          />
+          {selectedPanel === 'navigation' && (
+            <NavigationPanel
+              userInfo={userInfo}
+              planets={planets}
+              notification={notification}
+            />
+          )}
+          {selectedPanel === 'items' && <ItemsPanel userInfo={userInfo} />}
         </Center>
         <Footer>
           {<SignOutButton />}

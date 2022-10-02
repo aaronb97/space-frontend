@@ -1,37 +1,24 @@
-import { User } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useUserData } from '../hooks/useUserData';
+import { UserData } from '../types/UserData';
+import { Panel } from './Panel';
 
 interface Props {
-  user: User;
+  userInfo: UserData;
 }
 
-export function Items({ user }: Props) {
-  const { userInfo } = useUserData(user);
-  const navigate = useNavigate();
-
+export const ItemsPanel = ({ userInfo }: Props) => {
   return (
-    <div>
-      <div>
-        <button
-          onClick={() => {
-            navigate('/');
-          }}
-        >
-          Go back
-        </button>
-      </div>
-      Items:
+    <Panel>
+      <h2>Items</h2>{' '}
       {userInfo?.items?.map((item) => (
         <ItemDisplay
           key={item.name}
           item={item}
         />
       ))}
-    </div>
+    </Panel>
   );
-}
+};
 
 const Yellow = styled.div`
   color: yellow;

@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import { auth } from './firebase/firebaseApp';
 import { Game } from './routes/Game';
-import { Items } from './routes/items';
 
 const queryClient = new QueryClient();
 
@@ -30,10 +29,6 @@ function App() {
         <Route
           path="/"
           element={user ? <Game user={user} /> : 'Loading...'}
-        />
-        <Route
-          path="/items"
-          element={user ? <Items user={user} /> : 'Loading...'}
         />
       </Routes>
     </QueryClientProvider>
