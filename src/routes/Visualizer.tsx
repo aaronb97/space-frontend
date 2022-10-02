@@ -8,6 +8,7 @@ import { useUserData } from '../hooks/useUserData';
 import { User } from 'firebase/auth';
 import { Vector3 } from 'three';
 import { calculateDist } from '../utils/calculateDist';
+import * as TWEEN from '@tweenjs/tween.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -22,7 +23,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 const loader = new OBJLoader();
 
-camera.position.z = 10;
+camera.position.x = 0;
+camera.position.y = 0;
+camera.position.z = 1000;
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -66,6 +69,7 @@ const Visualizer = ({ user }: Props) => {
         });
 
         controls.update();
+        TWEEN.update();
       };
 
       animate();
@@ -113,9 +117,24 @@ const Visualizer = ({ user }: Props) => {
         zRand * normal,
       ];
 
-      camera.position.x = userInfo.positionX / factor + distance * xNorm;
-      camera.position.y = userInfo.positionY / factor + distance * yNorm;
-      camera.position.z = userInfo.positionZ / factor + distance * zNorm;
+      const coords = {
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z,
+      };
+
+      new TWEEN.Tween(coords)
+        .to({
+          x: userInfo.positionX / factor + distance * xNorm,
+          y: userInfo.positionY / factor + distance * yNorm,
+          z: userInfo.positionZ / factor + distance * zNorm,
+        })
+        .onUpdate((newCoords) => {
+          camera.position.set(newCoords.x, newCoords.y, newCoords.z);
+        })
+        .easing(TWEEN.Easing.Quartic.InOut)
+        .duration(10000)
+        .start();
 
       for (const planet of planets) {
         const x = planet.positionX / factor;
