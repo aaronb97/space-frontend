@@ -23,6 +23,14 @@
   },
   "plugins": ["react"],
   "rules": {
+    "padding-line-between-statements": [
+      "error",
+      {
+        "blankLine": "always",
+        "prev": ["block-like", "multiline-const", "multiline-expression"],
+        "next": "*"
+      }
+    ],
     "@typescript-eslint/explicit-function-return-type": "off",
     "react/react-in-jsx-scope": "off",
     "react/self-closing-comp": "error",

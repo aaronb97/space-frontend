@@ -114,7 +114,7 @@ export function Game({ user }: Props) {
             userInfo={userInfo}
             planets={planets}
             notification={notification}
-          ></NavigationPanel>
+          />
         </Center>
         <Footer>
           {<SignOutButton />}

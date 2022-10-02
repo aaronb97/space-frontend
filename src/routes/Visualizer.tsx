@@ -67,6 +67,7 @@ const Visualizer = ({ user }: Props) => {
 
         controls.update();
       };
+
       animate();
     }
   }, [planets]);
@@ -104,12 +105,14 @@ const Visualizer = ({ user }: Props) => {
         Math.random() - 0.5,
         Math.random() - 0.5,
       ];
+
       const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
       const [xNorm, yNorm, zNorm] = [
         xRand * normal,
         yRand * normal,
         zRand * normal,
       ];
+
       camera.position.x = userInfo.positionX / factor + distance * xNorm;
       camera.position.y = userInfo.positionY / factor + distance * yNorm;
       camera.position.z = userInfo.positionZ / factor + distance * zNorm;
@@ -162,6 +165,7 @@ const Visualizer = ({ user }: Props) => {
             )
             .getSpacedPoints(10000),
         );
+
         const m = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
         const l = new THREE.Line(g, m);
         l.rotateY(
@@ -172,12 +176,13 @@ const Visualizer = ({ user }: Props) => {
             planet.positionZ,
           ).angleTo(new Vector3(planet.positionX, planet.positionY, 0)),
         );
+
         scene.add(l);
       }
     }
   }, [planets, userInfo]);
 
-  return <div ref={ref}></div>;
+  return <div ref={ref} />;
 };
 
 export default Visualizer;

@@ -28,6 +28,7 @@ const CenterText = styled.div`
   width: 100%;
   justify-content: center;
 `;
+
 interface Props {
   userInfo: UserData;
   planets: Planet[];
