@@ -7,8 +7,8 @@ import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import { User } from 'firebase/auth';
 import { Vector3 } from 'three';
+import { calculateDist } from '../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
-import { UserStatus } from '../types/UserStatus';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -25,7 +25,7 @@ const loader = new OBJLoader();
 
 camera.position.x = 0;
 camera.position.y = 0;
-camera.position.z = 10000;
+camera.position.z = 1000;
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -74,7 +74,7 @@ const Visualizer = ({ user }: Props) => {
 
       animate();
     }
-  }, [planets, userInfo]);
+  }, [planets]);
 
   useEffect(() => {
     if (planets?.length && userInfo) {
@@ -97,42 +97,42 @@ const Visualizer = ({ user }: Props) => {
       light.position.set(0, 0, 0);
       scene.add(light);
 
+      // scene.add(userText);
       controls.target.set(x, y, z);
-      const coords = {
-        x: camera.position.x,
-        y: camera.position.y,
-        z: camera.position.z,
-      };
+      const distance = Math.max(
+        calculateDist(userInfo, userInfo.planet) / factor,
+        2,
+      );
 
       const [xRand, yRand, zRand] = [
         Math.random() - 0.5,
         Math.random() - 0.5,
-        Math.random() / 2,
+        Math.random() - 0.5,
       ];
 
       const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
-
       const [xNorm, yNorm, zNorm] = [
         xRand * normal,
         yRand * normal,
         zRand * normal,
       ];
 
-      const zoomFactor =
-        userInfo.status === UserStatus.LANDED
-          ? userInfo.planet.radius / 100000
-          : 0.01;
+      const coords = {
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z,
+      };
 
       new TWEEN.Tween(coords)
         .to({
-          x: userInfo.positionX / factor + xNorm * zoomFactor,
-          y: userInfo.positionY / factor + yNorm * zoomFactor,
-          z: userInfo.positionZ / factor + zNorm * zoomFactor,
+          x: userInfo.positionX / factor + distance * xNorm,
+          y: userInfo.positionY / factor + distance * yNorm,
+          z: userInfo.positionZ / factor + distance * zNorm,
         })
         .onUpdate((newCoords) => {
           camera.position.set(newCoords.x, newCoords.y, newCoords.z);
         })
-        .easing(TWEEN.Easing.Quartic.Out)
+        .easing(TWEEN.Easing.Quartic.InOut)
         .duration(10000)
         .start();
 
@@ -199,10 +199,6 @@ const Visualizer = ({ user }: Props) => {
         scene.add(l);
       }
     }
-
-    return () => {
-      scene.clear();
-    };
   }, [planets, userInfo]);
 
   return <div ref={ref} />;
