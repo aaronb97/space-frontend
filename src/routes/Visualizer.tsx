@@ -6,7 +6,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import { User } from 'firebase/auth';
-import { Vector3 } from 'three';
+import { AdditiveBlending, Vector3 } from 'three';
 import { calculateDist } from '../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
 
@@ -153,17 +153,6 @@ const Visualizer = ({ user }: Props) => {
 
         scene.add(sphere);
 
-        // const text = new SpriteText(planet.name);
-        // text.position.x = x;
-        // text.position.y = y;
-        // text.position.z = z + 10;
-        // scene.add(text);
-
-        // if (planet.name.includes('Moon')) {
-        //   // eslint-disable-next-line no-debugger
-        //   debugger;
-        // }
-
         const orbiting = planet.orbiting;
         const orbX = (orbiting?.positionX ?? 0) / factor;
         const orbY = (orbiting?.positionY ?? 0) / factor;
@@ -185,8 +174,10 @@ const Visualizer = ({ user }: Props) => {
             .getSpacedPoints(10000),
         );
 
-        const m = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
+        const m = new THREE.LineBasicMaterial({ color: 0x666666 });
         const l = new THREE.Line(g, m);
+        l.material.blending = AdditiveBlending;
+
         l.rotateY(
           // this is bogus
           new Vector3(
