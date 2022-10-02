@@ -61,9 +61,10 @@ const Visualizer = ({ user }: Props) => {
         renderer.render(scene, camera);
 
         spheres.forEach((sphere) => {
+          const radius = sphere.geometry.boundingSphere?.radius ?? 0.1;
           const distance = camera.position.distanceTo(sphere.position);
 
-          const scaleFactor = Math.max(distance, 1);
+          const scaleFactor = Math.max(distance / radius / 1000, 1);
 
           sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
         });
