@@ -107,7 +107,7 @@ const Visualizer = ({ user }: Props) => {
       const [xRand, yRand, zRand] = [
         Math.random() - 0.5,
         Math.random() - 0.5,
-        Math.random() - 0.5,
+        Math.random() / 2,
       ];
 
       const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
