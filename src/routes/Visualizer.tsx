@@ -199,6 +199,10 @@ const Visualizer = ({ user }: Props) => {
         scene.add(l);
       }
     }
+
+    return () => {
+      scene.clear();
+    };
   }, [planets, userInfo]);
 
   return <div ref={ref} />;
