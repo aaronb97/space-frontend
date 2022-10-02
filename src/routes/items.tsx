@@ -27,7 +27,7 @@ export function Items({ user }: Props) {
         <ItemDisplay
           key={item.name}
           item={item}
-        ></ItemDisplay>
+        />
       ))}
     </div>
   );

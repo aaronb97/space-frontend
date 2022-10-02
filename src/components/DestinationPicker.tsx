@@ -92,6 +92,6 @@ export const DestinationPicker = ({
           primary75: '#444',
         },
       })}
-    ></Select>
+    />
   );
 };

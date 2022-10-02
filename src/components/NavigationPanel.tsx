@@ -74,7 +74,7 @@ export const NavigationPanel = ({ userInfo, planets, notification }: Props) => {
                 onReachZero={() => {
                   void invalidateUserInfo();
                 }}
-              ></Counter>
+              />
             </div>
           )}
         {userInfo.speedBoostAvailable && (
@@ -108,7 +108,7 @@ export const NavigationPanel = ({ userInfo, planets, notification }: Props) => {
               onReachZero={() => {
                 void invalidateUserInfo();
               }}
-            ></Counter>
+            />
           </div>
         )}
       </Section>
@@ -119,7 +119,7 @@ export const NavigationPanel = ({ userInfo, planets, notification }: Props) => {
             selectedPlanet={selectedPlanet}
             userInfo={userInfo}
             onChange={(option) => setSelectedPlanet(option?.value ?? '')}
-          ></DestinationPicker>
+          />
         )}
         {selectedPlanet && (
           <div>
@@ -141,7 +141,7 @@ export const NavigationPanel = ({ userInfo, planets, notification }: Props) => {
         )}
       </FlexContainer>
       <CenterText>
-        <Notification text={notification}></Notification>
+        <Notification text={notification} />
       </CenterText>
     </Panel>
   );

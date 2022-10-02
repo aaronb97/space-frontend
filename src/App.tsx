@@ -30,11 +30,11 @@ function App() {
         <Route
           path="/"
           element={user ? <Game user={user} /> : 'Loading...'}
-        ></Route>
+        />
         <Route
           path="/items"
           element={user ? <Items user={user} /> : 'Loading...'}
-        ></Route>
+        />
       </Routes>
     </QueryClientProvider>
   );

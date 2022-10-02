@@ -16,11 +16,11 @@ root.render(
         <Route
           path="/login"
           element={<Login />}
-        ></Route>
+        />
         <Route
           path="/*"
           element={<App />}
-        ></Route>
+        />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
