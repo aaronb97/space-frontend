@@ -101,9 +101,10 @@ export function Game({ user }: Props) {
               </>
             )}
           </div>
-          {selectedPanel !== 'items' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <button
+                disabled={selectedPanel === 'items'}
                 onClick={() => {
                   setSelectedPanel('items');
                 }}
@@ -111,10 +112,9 @@ export function Game({ user }: Props) {
                 Items
               </button>
             </div>
-          )}
-          {selectedPanel !== 'navigation' && (
             <div>
               <button
+                disabled={selectedPanel === 'navigation'}
                 onClick={() => {
                   setSelectedPanel('navigation');
                 }}
@@ -122,7 +122,7 @@ export function Game({ user }: Props) {
                 Navigation
               </button>
             </div>
-          )}
+          </div>
         </Header>
         <Center>
           {selectedPanel === 'navigation' && (
