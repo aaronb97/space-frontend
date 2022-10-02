@@ -17,8 +17,8 @@ export const useUserData = (user: User) => {
   );
 
   const invalidate = useCallback(
-    async () => await queryClient.invalidateQueries(['userInfo', user.uid]),
-    [queryClient, user.uid],
+    async () => await queryClient.invalidateQueries(['userInfo']),
+    [queryClient],
   );
 
   useEffect(() => {
