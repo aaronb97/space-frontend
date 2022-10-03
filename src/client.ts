@@ -8,7 +8,7 @@ class Client {
   constructor(private readonly url: string) {}
 
   async login(user: User | null): Promise<AxiosResponse<UserData> | undefined> {
-    return await this.post('login', user);
+    return await this.post('login', undefined, user);
   }
 
   async speedboost(): Promise<AxiosResponse<UserData> | undefined> {
@@ -25,7 +25,15 @@ class Client {
     return await this.get('planets');
   }
 
-  private async post(path: string, user = auth.currentUser) {
+  async createGroup(name: string): Promise<AxiosResponse<string> | undefined> {
+    return await this.post('userGroups', { name });
+  }
+
+  private async post(
+    path: string,
+    data?: Record<string, any>,
+    user = auth.currentUser,
+  ) {
     if (!user) {
       console.error('User not defined');
       return;
@@ -33,7 +41,7 @@ class Client {
 
     const token = await user.getIdToken();
 
-    return await axios.post(`${this.url}/${path}`, undefined, {
+    return await axios.post(`${this.url}/${path}`, data, {
       headers: {
         authorization: `Bearer ${token}`,
       },

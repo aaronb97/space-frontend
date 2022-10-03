@@ -1,4 +1,5 @@
 import { Planet } from './Planet';
+import { UserGroup } from './UserGroup';
 
 export interface UserData {
   status: number;
@@ -23,4 +24,5 @@ export interface UserData {
 
   planet: Planet;
   visitedPlanets: Planet[];
+  groups: UserGroup[];
 }

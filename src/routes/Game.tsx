@@ -14,6 +14,8 @@ import Visualizer from '../components/Visualizer';
 import { NavigationPanel } from '../components/NavigationPanel';
 import { ItemsPanel } from '../components/ItemsPanel';
 import { PanelSelector } from '../components/PanelSelector';
+import { Panel } from '../components/Panel';
+import { GroupsPanel } from '../components/GroupsPanel';
 
 interface Props {
   user: User;
@@ -61,9 +63,9 @@ export function Game({ user }: Props) {
   const { userInfo, error: userError } = useUserData(user);
   const { planets, error: planetsError } = usePlanets();
 
-  const [selectedPanel, setSelectedPanel] = useState<'items' | 'navigation'>(
-    'navigation',
-  );
+  const [selectedPanel, setSelectedPanel] = useState<
+    'items' | 'navigation' | 'groups'
+  >('navigation');
 
   useEffect(() => {
     if (userInfo?.notification) {
@@ -108,14 +110,17 @@ export function Game({ user }: Props) {
           />
         </Header>
         <Center>
-          {selectedPanel === 'navigation' && (
-            <NavigationPanel
-              userInfo={userInfo}
-              planets={planets}
-              notification={notification}
-            />
-          )}
-          {selectedPanel === 'items' && <ItemsPanel userInfo={userInfo} />}
+          <Panel>
+            {selectedPanel === 'navigation' && (
+              <NavigationPanel
+                userInfo={userInfo}
+                planets={planets}
+                notification={notification}
+              />
+            )}
+            {selectedPanel === 'items' && <ItemsPanel userInfo={userInfo} />}
+            {selectedPanel === 'groups' && <GroupsPanel userInfo={userInfo} />}
+          </Panel>
         </Center>
         <Footer>
           {<SignOutButton />}

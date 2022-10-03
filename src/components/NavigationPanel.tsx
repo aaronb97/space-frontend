@@ -7,7 +7,6 @@ import { UserData } from '../types/UserData';
 import { getDateString } from '../utils/getDateString';
 import { Counter } from './Counter';
 import { DestinationPicker } from './DestinationPicker';
-import { Panel } from './Panel';
 import { Notification } from '../components/Notification';
 
 const Section = styled.div`
@@ -52,7 +51,7 @@ export const NavigationPanel = ({ userInfo, planets, notification }: Props) => {
     : undefined;
 
   return (
-    <Panel>
+    <>
       {userInfo.status === 0 && <div>Traveling to {userInfo.planet.name}</div>}
       {userInfo.status === 1 && <div>Welcome to {userInfo.planet.name}</div>}
       <Section>
@@ -144,6 +143,6 @@ export const NavigationPanel = ({ userInfo, planets, notification }: Props) => {
       <CenterText>
         <Notification text={notification} />
       </CenterText>
-    </Panel>
+    </>
   );
 };

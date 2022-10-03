@@ -1,7 +1,7 @@
 interface Props {
   selectedPanel: string;
   setSelectedPanel: React.Dispatch<
-    React.SetStateAction<'items' | 'navigation'>
+    React.SetStateAction<'items' | 'navigation' | 'groups'>
   >;
 }
 
@@ -35,6 +35,17 @@ export const PanelSelector = ({ selectedPanel, setSelectedPanel }: Props) => {
           }}
         >
           Navigation
+        </button>
+      </div>
+      <div>
+        <button
+          style={{ width: '100%' }}
+          disabled={selectedPanel === 'groups'}
+          onClick={() => {
+            setSelectedPanel('groups');
+          }}
+        >
+          Groups
         </button>
       </div>
     </div>

@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import { UserData } from '../types/UserData';
-import { Panel } from './Panel';
 
 interface Props {
   userInfo: UserData;
@@ -8,7 +7,7 @@ interface Props {
 
 export const ItemsPanel = ({ userInfo }: Props) => {
   return (
-    <Panel>
+    <>
       <h2 style={{ marginTop: '0px' }}>Items</h2>{' '}
       {userInfo?.items?.map((item) => (
         <ItemDisplay
@@ -16,7 +15,7 @@ export const ItemsPanel = ({ userInfo }: Props) => {
           item={item}
         />
       ))}
-    </Panel>
+    </>
   );
 };
 
