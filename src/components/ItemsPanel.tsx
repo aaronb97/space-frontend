@@ -9,7 +9,7 @@ interface Props {
 export const ItemsPanel = ({ userInfo }: Props) => {
   return (
     <Panel>
-      <h2>Items</h2>{' '}
+      <h2 style={{ marginTop: '0px' }}>Items</h2>{' '}
       {userInfo?.items?.map((item) => (
         <ItemDisplay
           key={item.name}
