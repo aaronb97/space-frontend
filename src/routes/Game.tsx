@@ -13,6 +13,7 @@ import { logError } from '../utils/logError';
 import Visualizer from '../components/Visualizer';
 import { NavigationPanel } from '../components/NavigationPanel';
 import { ItemsPanel } from '../components/ItemsPanel';
+import { PanelSelector } from '../components/PanelSelector';
 
 interface Props {
   user: User;
@@ -61,7 +62,7 @@ export function Game({ user }: Props) {
   const { planets, error: planetsError } = usePlanets();
 
   const [selectedPanel, setSelectedPanel] = useState<'items' | 'navigation'>(
-    'items',
+    'navigation',
   );
 
   useEffect(() => {
@@ -101,37 +102,10 @@ export function Game({ user }: Props) {
               </>
             )}
           </div>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              width: '80px',
-            }}
-          >
-            <div>
-              <button
-                style={{ width: '100%' }}
-                disabled={selectedPanel === 'items'}
-                onClick={() => {
-                  setSelectedPanel('items');
-                }}
-              >
-                Items
-              </button>
-            </div>
-            <div>
-              <button
-                style={{ width: '100%' }}
-                disabled={selectedPanel === 'navigation'}
-                onClick={() => {
-                  setSelectedPanel('navigation');
-                }}
-              >
-                Navigation
-              </button>
-            </div>
-          </div>
+          <PanelSelector
+            selectedPanel={selectedPanel}
+            setSelectedPanel={setSelectedPanel}
+          />
         </Header>
         <Center>
           {selectedPanel === 'navigation' && (
