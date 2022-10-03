@@ -101,9 +101,17 @@ export function Game({ user }: Props) {
               </>
             )}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              width: '80px',
+            }}
+          >
             <div>
               <button
+                style={{ width: '100%' }}
                 disabled={selectedPanel === 'items'}
                 onClick={() => {
                   setSelectedPanel('items');
@@ -114,6 +122,7 @@ export function Game({ user }: Props) {
             </div>
             <div>
               <button
+                style={{ width: '100%' }}
                 disabled={selectedPanel === 'navigation'}
                 onClick={() => {
                   setSelectedPanel('navigation');
