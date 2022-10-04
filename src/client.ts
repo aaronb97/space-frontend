@@ -29,6 +29,10 @@ class Client {
     return await this.post('userGroups', { name });
   }
 
+  async joinGroup(uuid: string): Promise<AxiosResponse<string> | undefined> {
+    return await this.post(`joinGroup/${uuid}`);
+  }
+
   private async post(
     path: string,
     data?: Record<string, any>,

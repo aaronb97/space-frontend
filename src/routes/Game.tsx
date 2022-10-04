@@ -16,6 +16,7 @@ import { ItemsPanel } from '../components/ItemsPanel';
 import { PanelSelector } from '../components/PanelSelector';
 import { Panel } from '../components/Panel';
 import { GroupsPanel } from '../components/GroupsPanel';
+import { useJoinGroup } from '../hooks/useJoinGroup';
 
 interface Props {
   user: User;
@@ -63,6 +64,8 @@ export function Game({ user }: Props) {
   const { userInfo, error: userError } = useUserData(user);
   const { planets, error: planetsError } = usePlanets();
 
+  const joinGroup = useJoinGroup();
+
   const [selectedPanel, setSelectedPanel] = useState<
     'items' | 'navigation' | 'groups'
   >('navigation');
@@ -89,6 +92,8 @@ export function Game({ user }: Props) {
   if (!userInfo || !planets) {
     return <div>Loading...</div>;
   }
+
+  joinGroup();
 
   return (
     <>

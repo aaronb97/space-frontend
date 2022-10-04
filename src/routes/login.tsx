@@ -5,7 +5,7 @@ import {
   signInWithPopup,
 } from 'firebase/auth';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { auth } from '../firebase/firebaseApp';
 import { logError } from '../utils/logError';
@@ -14,16 +14,22 @@ const google = new GoogleAuthProvider();
 
 export function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const join = searchParams.get('join');
       if (user) {
-        navigate('/');
+        if (join) {
+          navigate('/?join=' + join);
+        } else {
+          navigate('/');
+        }
       }
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   const onClickGoogle = () => {
     signInWithPopup(auth, google).catch((e) => console.error(e));
