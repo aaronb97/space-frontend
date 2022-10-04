@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
@@ -52,6 +52,8 @@ const Visualizer = ({ user }: Props) => {
   const { userInfo } = useUserData(user);
   const ref = useRef<HTMLDivElement>(null);
 
+  const [currentPlanetId, setCurrentPlanetId] = useState<number>();
+
   useEffect(() => {
     if (!ref.current?.contains(renderer.domElement)) {
       ref.current?.appendChild(renderer.domElement);
@@ -79,6 +81,7 @@ const Visualizer = ({ user }: Props) => {
 
   useEffect(() => {
     if (planets?.length && userInfo) {
+      console.log('REBUILD SCENE');
       scene.clear();
       const x = userInfo?.positionX / factor;
       const y = userInfo?.positionY / factor;
@@ -100,42 +103,48 @@ const Visualizer = ({ user }: Props) => {
 
       // scene.add(userText);
       controls.target.set(x, y, z);
-      const distance = Math.max(
-        calculateDist(userInfo, userInfo.planet) / factor,
-        2,
-      );
 
-      const [xRand, yRand, zRand] = [
-        Math.random() - 0.5,
-        Math.random() - 0.5,
-        Math.random() / 2,
-      ];
+      if (currentPlanetId !== userInfo.planet.id) {
+        console.log('TRIGGER CAMERA PAN');
+        const distance = Math.max(
+          calculateDist(userInfo, userInfo.planet) / factor,
+          2,
+        );
 
-      const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
-      const [xNorm, yNorm, zNorm] = [
-        xRand * normal,
-        yRand * normal,
-        zRand * normal,
-      ];
+        const [xRand, yRand, zRand] = [
+          Math.random() - 0.5,
+          Math.random() - 0.5,
+          Math.random() / 2,
+        ];
 
-      const coords = {
-        x: camera.position.x,
-        y: camera.position.y,
-        z: camera.position.z,
-      };
+        const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
+        const [xNorm, yNorm, zNorm] = [
+          xRand * normal,
+          yRand * normal,
+          zRand * normal,
+        ];
 
-      new TWEEN.Tween(coords)
-        .to({
-          x: userInfo.positionX / factor + distance * xNorm,
-          y: userInfo.positionY / factor + distance * yNorm,
-          z: userInfo.positionZ / factor + distance * zNorm,
-        })
-        .onUpdate((newCoords) => {
-          camera.position.set(newCoords.x, newCoords.y, newCoords.z);
-        })
-        .easing(TWEEN.Easing.Quartic.InOut)
-        .duration(10000)
-        .start();
+        const coords = {
+          x: camera.position.x,
+          y: camera.position.y,
+          z: camera.position.z,
+        };
+
+        new TWEEN.Tween(coords)
+          .to({
+            x: userInfo.positionX / factor + distance * xNorm,
+            y: userInfo.positionY / factor + distance * yNorm,
+            z: userInfo.positionZ / factor + distance * zNorm,
+          })
+          .onUpdate((newCoords) => {
+            camera.position.set(newCoords.x, newCoords.y, newCoords.z);
+          })
+          .easing(TWEEN.Easing.Quartic.InOut)
+          .duration(10000)
+          .start();
+
+        setCurrentPlanetId(userInfo.planet.id);
+      }
 
       for (const planet of planets) {
         const x = planet.positionX / factor;
@@ -195,7 +204,7 @@ const Visualizer = ({ user }: Props) => {
     return () => {
       scene.clear();
     };
-  }, [planets, userInfo]);
+  }, [currentPlanetId, planets, userInfo]);
 
   return <div ref={ref} />;
 };
