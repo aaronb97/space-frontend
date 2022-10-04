@@ -16,7 +16,25 @@ export const GroupsPanel = ({ userInfo }: Props) => {
     <>
       {userInfo.groups.map((group) => (
         <div key={`${group.uuid} container`}>
-          <h3 key={group.uuid}>{group.name}</h3>
+          <h3 key={group.uuid}>
+            {group.name}{' '}
+            <button
+              onClick={() => {
+                navigator.clipboard
+                  .writeText(
+                    `Join my group on Space Game!\n\n${window.location.href}?join=${group.uuid}`,
+                  )
+                  .then(() => {
+                    console.log('Copied to clipboard');
+                  })
+                  .catch(() => {
+                    console.error('Failed to copy to clipboard');
+                  });
+              }}
+            >
+              🔗
+            </button>
+          </h3>
           {group.users
             .filter((user) => user.username !== userInfo.username)
             .map((user) => (
