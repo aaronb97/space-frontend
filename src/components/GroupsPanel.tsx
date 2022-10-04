@@ -28,6 +28,7 @@ export const GroupsPanel = ({ userInfo }: Props) => {
         <input
           onChange={(e) => setNewGroupName(e.target.value)}
           value={newGroupName}
+          placeholder={'Enter Group Name'}
         />
         <button
           disabled={newGroupName.length < 1}
