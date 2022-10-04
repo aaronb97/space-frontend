@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { client } from '../client';
 import { UserData } from '../types/UserData';
@@ -9,18 +10,32 @@ interface Props {
 
 export const GroupsPanel = ({ userInfo }: Props) => {
   const queryClient = useQueryClient();
+  const [newGroupName, setNewGroupName] = useState('');
+
   return (
     <>
-      <h3>Groups</h3>
       {userInfo.groups.map((group) => (
-        <div key={group.name}>{group.name}</div>
+        <div key={`${group.uuid} container`}>
+          <h3 key={group.uuid}>{group.name}</h3>
+          {group.users
+            .filter((user) => user.username !== userInfo.username)
+            .map((user) => (
+              <div key={`${user.username} ${group.name}`}>{user.username}</div>
+            ))}
+        </div>
       ))}
       <div>
+        <input
+          onChange={(e) => setNewGroupName(e.target.value)}
+          value={newGroupName}
+        />
         <button
+          disabled={newGroupName.length < 1}
           onClick={() => {
             client
-              .createGroup(`Group ${Math.random()}`)
+              .createGroup(newGroupName)
               .then(() => {
+                setNewGroupName('');
                 void queryClient.invalidateQueries(['userInfo']);
               })
               .catch((e) => logError(e));
