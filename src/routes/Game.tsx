@@ -62,6 +62,9 @@ const SignOutButton = () => {
 export function Game({ user }: Props) {
   const [isAnonymous, setIsAnonymous] = useState(user.isAnonymous);
   const [notification, setNotification] = useState<string | undefined>('');
+  const [groupNotification, setGroupNotification] = useState<
+    string | undefined
+  >('');
 
   const { userInfo, error: userError } = useUserData(user);
   const { planets, error: planetsError } = usePlanets();
@@ -85,15 +88,21 @@ export function Game({ user }: Props) {
 
   useEffect(() => {
     const join = searchParams.get('join');
+    console.log(userInfo, join);
     if (userInfo && join) {
       client
         .joinGroup(join)
-        .then(() => {
-          console.log('Successfully joined group');
+        .then((group) => {
           void queryClient.invalidateQueries(['userInfo']);
+          const name = group?.data.name;
+          if (name) {
+            setTimeout(() => {
+              setGroupNotification(`Successfully joined '${group?.data.name}'`);
+            }, 1000);
+          }
         })
         .catch(() => {
-          console.log('Failed to join group');
+          setGroupNotification('Failed to join group');
         })
         .finally(() => {
           setSearchParams('');
@@ -139,7 +148,9 @@ export function Game({ user }: Props) {
               <NavigationPanel
                 userInfo={userInfo}
                 planets={planets}
-                notification={notification}
+                notifications={[notification, groupNotification].filter(
+                  Boolean,
+                )}
               />
             )}
             {selectedPanel === 'items' && <ItemsPanel userInfo={userInfo} />}

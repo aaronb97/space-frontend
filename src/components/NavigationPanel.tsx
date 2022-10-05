@@ -24,17 +24,23 @@ const FlexContainer = styled.div`
 
 const CenterText = styled.div`
   display: flex;
+  flex-direction: column;
   width: 100%;
   justify-content: center;
+  align-items: center;
 `;
 
 interface Props {
   userInfo: UserData;
   planets: Planet[];
-  notification: string | undefined;
+  notifications: Array<string | undefined>;
 }
 
-export const NavigationPanel = ({ userInfo, planets, notification }: Props) => {
+export const NavigationPanel = ({
+  userInfo,
+  planets,
+  notifications,
+}: Props) => {
   const [selectedPlanet, setSelectedPlanet] = useState<number | ''>('');
 
   const queryClient = useQueryClient();
@@ -141,7 +147,12 @@ export const NavigationPanel = ({ userInfo, planets, notification }: Props) => {
         )}
       </FlexContainer>
       <CenterText>
-        <Notification text={notification} />
+        {notifications.map((notif) => (
+          <Notification
+            key={notif}
+            text={notif}
+          />
+        ))}
       </CenterText>
     </>
   );

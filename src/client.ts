@@ -3,6 +3,7 @@ import { User } from 'firebase/auth';
 import { auth } from './firebase/firebaseApp';
 import { Planet } from './types/Planet';
 import { UserData } from './types/UserData';
+import { UserGroup } from './types/UserGroup';
 
 class Client {
   constructor(private readonly url: string) {}
@@ -29,7 +30,7 @@ class Client {
     return await this.post('userGroups', { name });
   }
 
-  async joinGroup(uuid: string): Promise<AxiosResponse<string> | undefined> {
+  async joinGroup(uuid: string): Promise<AxiosResponse<UserGroup> | undefined> {
     return await this.post(`joinGroup/${uuid}`);
   }
 
