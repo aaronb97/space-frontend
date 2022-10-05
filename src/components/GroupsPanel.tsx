@@ -1,12 +1,21 @@
 import { useState } from 'react';
 import { useQueryClient } from 'react-query';
+import styled from 'styled-components';
 import { client } from '../client';
 import { UserData } from '../types/UserData';
 import { logError } from '../utils/logError';
+import { GroupsDisplay } from './GroupDisplay';
 
 interface Props {
   userInfo: UserData;
 }
+
+const CreateGroupSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 24px;
+`;
 
 export const GroupsPanel = ({ userInfo }: Props) => {
   const queryClient = useQueryClient();
@@ -15,56 +24,37 @@ export const GroupsPanel = ({ userInfo }: Props) => {
   return (
     <>
       {userInfo.groups.map((group) => (
-        <div key={`${group.uuid} container`}>
-          <h3 key={group.uuid}>
-            {group.name}{' '}
+        <GroupsDisplay
+          key={group.uuid}
+          group={group}
+        />
+      ))}
+      {userInfo.groups.length <= 5 && (
+        <CreateGroupSection>
+          <input
+            onChange={(e) => setNewGroupName(e.target.value)}
+            value={newGroupName}
+            style={{ width: '65%', marginRight: '8px' }}
+            placeholder={'Enter New Group Name'}
+            maxLength={20}
+          />
+          {newGroupName.length > 0 && (
             <button
               onClick={() => {
-                navigator.clipboard
-                  .writeText(
-                    `Join my group on Space Game!\n\n${window.location.href}?join=${group.uuid}`,
-                  )
+                client
+                  .createGroup(newGroupName)
                   .then(() => {
-                    console.log('Copied to clipboard');
+                    setNewGroupName('');
+                    void queryClient.invalidateQueries(['userInfo']);
                   })
-                  .catch(() => {
-                    console.error('Failed to copy to clipboard');
-                  });
+                  .catch((e) => logError(e));
               }}
             >
-              Copy Invite Link
+              Create Group
             </button>
-          </h3>
-          {group.users
-            .filter((user) => user.username !== userInfo.username)
-            .map((user) => (
-              <div key={`${user.username} ${group.name}`}>{user.username}</div>
-            ))}
-        </div>
-      ))}
-      <p>
-        <input
-          onChange={(e) => setNewGroupName(e.target.value)}
-          value={newGroupName}
-          style={{ width: '70%' }}
-          placeholder={'Enter New Group Name'}
-        />
-        {newGroupName.length > 0 && (
-          <button
-            onClick={() => {
-              client
-                .createGroup(newGroupName)
-                .then(() => {
-                  setNewGroupName('');
-                  void queryClient.invalidateQueries(['userInfo']);
-                })
-                .catch((e) => logError(e));
-            }}
-          >
-            Create Group
-          </button>
-        )}
-      </p>
+          )}
+        </CreateGroupSection>
+      )}
     </>
   );
 };
