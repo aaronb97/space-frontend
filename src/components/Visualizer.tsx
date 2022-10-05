@@ -56,6 +56,74 @@ const Visualizer = ({ user }: Props) => {
 
   useEffect(() => {
     if (!ref.current?.contains(renderer.domElement)) {
+      if (userInfo) {
+        setInterval(() => {
+          // const g = new THREE.BufferGeometry().setFromPoints(
+          //   new THREE.Path()
+          //     .absarc(
+          //       userInfo?.positionX / factor,
+          //       userInfo?.positionY / factor,
+          //       1,
+          //       0,
+          //       Math.PI * 2,
+          //       false,
+          //     )
+          //     .getSpacedPoints(10000),
+          // );
+
+          const m = new THREE.LineBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+          });
+
+          const l = new THREE.Line(new THREE.BufferGeometry(), m);
+          scene.add(l);
+
+          new TWEEN.Tween({ r: 1 })
+            .to({
+              r: 10,
+            })
+            .onUpdate(({ r }) => {
+              l.geometry.dispose();
+              const newg = new THREE.BufferGeometry().setFromPoints(
+                new THREE.Path()
+                  .absarc(
+                    userInfo?.positionX / factor,
+                    userInfo?.positionY / factor,
+                    (r *
+                      calculateDist(
+                        {
+                          positionX: camera.position.x,
+                          positionY: camera.position.y,
+                          positionZ: camera.position.z,
+                        },
+                        {
+                          positionX: userInfo.positionX / factor,
+                          positionY: userInfo.positionY / factor,
+                          positionZ: userInfo.positionZ / factor,
+                        },
+                      )) /
+                      750,
+                    0,
+                    Math.PI * 2,
+                    false,
+                  )
+                  .getSpacedPoints(100),
+              );
+
+              l.geometry = newg;
+              l.material.opacity = 10 - r;
+            })
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .duration(1000)
+            .start();
+
+          setTimeout(() => {
+            scene.remove(l);
+          }, 1000);
+        }, 1000);
+      }
+
       ref.current?.appendChild(renderer.domElement);
       const animate = () => {
         requestAnimationFrame(animate);
@@ -77,7 +145,7 @@ const Visualizer = ({ user }: Props) => {
 
       animate();
     }
-  }, [planets]);
+  }, [planets, userInfo]);
 
   useEffect(() => {
     if (planets?.length && userInfo) {
