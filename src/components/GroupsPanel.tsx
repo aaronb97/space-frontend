@@ -17,19 +17,30 @@ const CreateGroupSection = styled.div`
   margin-top: 24px;
 `;
 
+const Text = styled.div`
+  max-width: 300px; ;
+`;
+
 export const GroupsPanel = ({ userInfo }: Props) => {
   const queryClient = useQueryClient();
   const [newGroupName, setNewGroupName] = useState('');
 
   return (
     <>
-      {userInfo.groups.map((group) => (
-        <GroupsDisplay
-          key={group.uuid}
-          group={group}
-          currentUsername={userInfo.username}
-        />
-      ))}
+      {userInfo.groups.length ? (
+        userInfo.groups.map((group) => (
+          <GroupsDisplay
+            key={group.uuid}
+            group={group}
+            currentUsername={userInfo.username}
+          />
+        ))
+      ) : (
+        <Text>
+          Get started by creating a new group, or click an invite link from
+          someone already in a group
+        </Text>
+      )}
       {userInfo.groups.length <= 5 && (
         <CreateGroupSection>
           <input
