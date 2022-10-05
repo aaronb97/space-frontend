@@ -18,7 +18,7 @@ const CreateGroupSection = styled.div`
 `;
 
 const Text = styled.div`
-  max-width: 300px; ;
+  max-width: 300px;
 `;
 
 export const GroupsPanel = ({ userInfo }: Props) => {
