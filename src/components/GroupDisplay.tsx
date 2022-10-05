@@ -1,9 +1,6 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 import { UserGroup } from '../types/UserGroup';
-
-interface Props {
-  group: UserGroup;
-}
 
 const StyledDiv = styled.div`
   padding-bottom: 16px;
@@ -21,7 +18,15 @@ const Header = styled.h3`
   justify-content: space-between;
 `;
 
-export const GroupsDisplay = ({ group }: Props) => {
+interface Props {
+  group: UserGroup;
+  currentUsername: string;
+}
+
+export const GroupsDisplay = ({ group, currentUsername }: Props) => {
+  const users = group.users.filter((user) => user.username !== currentUsername);
+  const [showClipboardNotif, setShowClipboardNotif] = useState(false);
+
   return (
     <StyledDiv key={`${group.uuid} container`}>
       <Header key={group.uuid}>
@@ -30,23 +35,28 @@ export const GroupsDisplay = ({ group }: Props) => {
           onClick={() => {
             navigator.clipboard
               .writeText(
-                `Join my group in Space Game!\n\n${window.location.href}?join=${group.uuid}`,
+                `Join my group ${group.name} in Space Game!\n\n${window.location.href}?join=${group.uuid}`,
               )
               .then(() => {
-                console.log('Copied to clipboard');
+                setShowClipboardNotif(true);
+                setTimeout(() => {
+                  setShowClipboardNotif(false);
+                }, 3000);
               })
               .catch(() => {
                 console.error('Failed to copy to clipboard');
               });
           }}
         >
-          Copy Invite Link
+          {showClipboardNotif ? 'Copied to Clipboard!' : 'Copy Invite Link'}
         </button>
       </Header>
       <Content>
-        {group.users.map((user) => (
-          <div key={`${user.username} ${group.name}`}>{user.username}</div>
-        ))}
+        {users.length
+          ? users.map((user) => (
+              <div key={`${user.username} ${group.name}`}>{user.username}</div>
+            ))
+          : 'No one here yet... (besides you)'}
       </Content>
     </StyledDiv>
   );

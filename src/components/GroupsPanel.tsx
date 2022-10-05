@@ -27,6 +27,7 @@ export const GroupsPanel = ({ userInfo }: Props) => {
         <GroupsDisplay
           key={group.uuid}
           group={group}
+          currentUsername={userInfo.username}
         />
       ))}
       {userInfo.groups.length <= 5 && (
