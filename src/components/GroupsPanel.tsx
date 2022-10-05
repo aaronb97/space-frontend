@@ -32,7 +32,7 @@ export const GroupsPanel = ({ userInfo }: Props) => {
                   });
               }}
             >
-              🔗
+              Copy Invite Link
             </button>
           </h3>
           {group.users
@@ -42,27 +42,29 @@ export const GroupsPanel = ({ userInfo }: Props) => {
             ))}
         </div>
       ))}
-      <div>
+      <p>
         <input
           onChange={(e) => setNewGroupName(e.target.value)}
           value={newGroupName}
-          placeholder={'Enter Group Name'}
+          style={{ width: '70%' }}
+          placeholder={'Enter New Group Name'}
         />
-        <button
-          disabled={newGroupName.length < 1}
-          onClick={() => {
-            client
-              .createGroup(newGroupName)
-              .then(() => {
-                setNewGroupName('');
-                void queryClient.invalidateQueries(['userInfo']);
-              })
-              .catch((e) => logError(e));
-          }}
-        >
-          Create Group
-        </button>
-      </div>
+        {newGroupName.length > 0 && (
+          <button
+            onClick={() => {
+              client
+                .createGroup(newGroupName)
+                .then(() => {
+                  setNewGroupName('');
+                  void queryClient.invalidateQueries(['userInfo']);
+                })
+                .catch((e) => logError(e));
+            }}
+          >
+            Create Group
+          </button>
+        )}
+      </p>
     </>
   );
 };
