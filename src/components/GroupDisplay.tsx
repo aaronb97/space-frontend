@@ -11,7 +11,7 @@ const StyledDiv = styled.div`
 `;
 
 const Content = styled.div`
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: 200px;
 `;
 
