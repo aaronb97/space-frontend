@@ -79,6 +79,20 @@ const Visualizer = ({ user }: Props) => {
           const l = new THREE.Line(new THREE.BufferGeometry(), m);
           scene.add(l);
 
+          const dist =
+            calculateDist(
+              {
+                positionX: camera.position.x,
+                positionY: camera.position.y,
+                positionZ: camera.position.z,
+              },
+              {
+                positionX: userInfo.positionX / factor,
+                positionY: userInfo.positionY / factor,
+                positionZ: userInfo.positionZ / factor,
+              },
+            ) / 750;
+
           new TWEEN.Tween({ r: 1 })
             .to({
               r: 10,
@@ -90,20 +104,7 @@ const Visualizer = ({ user }: Props) => {
                   .absarc(
                     userInfo?.positionX / factor,
                     userInfo?.positionY / factor,
-                    (r *
-                      calculateDist(
-                        {
-                          positionX: camera.position.x,
-                          positionY: camera.position.y,
-                          positionZ: camera.position.z,
-                        },
-                        {
-                          positionX: userInfo.positionX / factor,
-                          positionY: userInfo.positionY / factor,
-                          positionZ: userInfo.positionZ / factor,
-                        },
-                      )) /
-                      750,
+                    r * dist,
                     0,
                     Math.PI * 2,
                     false,
@@ -112,7 +113,8 @@ const Visualizer = ({ user }: Props) => {
               );
 
               l.geometry = newg;
-              l.material.opacity = 10 - r;
+              l.position.z = userInfo.positionZ / factor;
+              l.material.opacity = dist > 0.001 ? 10 - r : 0;
             })
             .easing(TWEEN.Easing.Quadratic.Out)
             .duration(1000)
