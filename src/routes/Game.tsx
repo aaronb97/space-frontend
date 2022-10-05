@@ -16,7 +16,9 @@ import { ItemsPanel } from '../components/ItemsPanel';
 import { PanelSelector } from '../components/PanelSelector';
 import { Panel } from '../components/Panel';
 import { GroupsPanel } from '../components/GroupsPanel';
-import { useJoinGroup } from '../hooks/useJoinGroup';
+import { useSearchParams } from 'react-router-dom';
+import { client } from '../client';
+import { useQueryClient } from 'react-query';
 
 interface Props {
   user: User;
@@ -64,7 +66,8 @@ export function Game({ user }: Props) {
   const { userInfo, error: userError } = useUserData(user);
   const { planets, error: planetsError } = usePlanets();
 
-  const joinGroup = useJoinGroup();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
 
   const [selectedPanel, setSelectedPanel] = useState<
     'items' | 'navigation' | 'groups'
@@ -80,6 +83,24 @@ export function Game({ user }: Props) {
     }
   }, [userInfo?.notification]);
 
+  useEffect(() => {
+    const join = searchParams.get('join');
+    if (userInfo && join) {
+      client
+        .joinGroup(join)
+        .then(() => {
+          console.log('Successfully joined group');
+          void queryClient.invalidateQueries(['userInfo']);
+        })
+        .catch(() => {
+          console.log('Failed to join group');
+        })
+        .finally(() => {
+          setSearchParams('');
+        });
+    }
+  }, [queryClient, searchParams, setSearchParams, userInfo]);
+
   if (userError || planetsError) {
     return (
       <div>
@@ -92,8 +113,6 @@ export function Game({ user }: Props) {
   if (!userInfo || !planets) {
     return <div>Loading...</div>;
   }
-
-  joinGroup();
 
   return (
     <>
