@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { UserGroup } from '../types/UserGroup';
+import { ColoredUsername } from './ColoredUsername';
 
 const StyledDiv = styled.div`
   padding-bottom: 16px;
@@ -20,11 +21,10 @@ const Header = styled.h3`
 
 interface Props {
   group: UserGroup;
-  currentUsername: string;
 }
 
-export const GroupsDisplay = ({ group, currentUsername }: Props) => {
-  const users = group.users.filter((user) => user.username !== currentUsername);
+export const GroupsDisplay = ({ group }: Props) => {
+  const users = group.users;
   const [showClipboardNotif, setShowClipboardNotif] = useState(false);
 
   return (
@@ -52,9 +52,11 @@ export const GroupsDisplay = ({ group, currentUsername }: Props) => {
         </button>
       </Header>
       <Content>
-        {users.length
+        {users.length > 1
           ? users.map((user) => (
-              <div key={`${user.username} ${group.name}`}>{user.username}</div>
+              <div key={`${user.username} ${group.name}`}>
+                <ColoredUsername userInfo={user} />
+              </div>
             ))
           : 'No one here yet... (besides you)'}
       </Content>

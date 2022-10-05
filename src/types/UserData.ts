@@ -25,4 +25,5 @@ export interface UserData {
   planet: Planet;
   visitedPlanets: Planet[];
   groups: UserGroup[];
+  color: string;
 }

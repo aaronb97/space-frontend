@@ -19,6 +19,7 @@ import { GroupsPanel } from '../components/GroupsPanel';
 import { useSearchParams } from 'react-router-dom';
 import { client } from '../client';
 import { useQueryClient } from 'react-query';
+import { ColoredUsername } from '../components/ColoredUsername';
 
 interface Props {
   user: User;
@@ -130,10 +131,14 @@ export function Game({ user }: Props) {
         <Header>
           <div>
             {isAnonymous ? (
-              <div>Signed in as Guest ({userInfo.username})</div>
+              <div>
+                Signed in as Guest (<ColoredUsername userInfo={userInfo} />)
+              </div>
             ) : (
               <>
-                <div>Signed in as {userInfo.username}</div>
+                <div>
+                  Signed in as <ColoredUsername userInfo={userInfo} />
+                </div>
               </>
             )}
           </div>
