@@ -10,6 +10,11 @@ const StyledDiv = styled.div`
   border-bottom: 1px solid #333333;
 `;
 
+const Content = styled.div`
+  overflow-y: scroll;
+  max-height: 200px;
+`;
+
 const Header = styled.h3`
   margin-top: 8px;
   display: flex;
@@ -38,9 +43,11 @@ export const GroupsDisplay = ({ group }: Props) => {
           Copy Invite Link
         </button>
       </Header>
-      {group.users.map((user) => (
-        <div key={`${user.username} ${group.name}`}>{user.username}</div>
-      ))}
+      <Content>
+        {group.users.map((user) => (
+          <div key={`${user.username} ${group.name}`}>{user.username}</div>
+        ))}
+      </Content>
     </StyledDiv>
   );
 };
