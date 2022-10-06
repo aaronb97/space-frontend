@@ -46,12 +46,12 @@ effectFXAA.uniforms.resolution.value.set(
 
 composer.addPass(effectFXAA);
 
-outlinePass.edgeStrength = Number(10);
-outlinePass.edgeGlow = Number(0);
-outlinePass.edgeThickness = Number(1);
+outlinePass.edgeStrength = Number(3);
+outlinePass.edgeGlow = Number(0.1);
+outlinePass.edgeThickness = Number(0.1);
 outlinePass.pulsePeriod = Number(0);
-outlinePass.visibleEdgeColor.set('#ffffff');
-outlinePass.hiddenEdgeColor.set('#ffffff');
+outlinePass.visibleEdgeColor.set('#190a05');
+outlinePass.hiddenEdgeColor.set('#190a05');
 
 composer.addPass(outlinePass);
 
@@ -75,13 +75,10 @@ interface Props {
 
 const sqr = (num: number) => Math.pow(num, 2);
 
-const spheres: Array<
-  | THREE.Mesh<THREE.SphereGeometry, THREE.Material>
-  | THREE.LineSegments<
-      THREE.EdgesGeometry<THREE.SphereGeometry>,
-      THREE.LineBasicMaterial
-    >
-> = [];
+const whiteSpheres: Array<THREE.Mesh<THREE.SphereGeometry, THREE.Material>> =
+  [];
+
+const spheres: Array<THREE.Mesh<THREE.SphereGeometry, THREE.Material>> = [];
 
 const objects: THREE.Group[] = [];
 
@@ -181,6 +178,22 @@ const Visualizer = ({ user }: Props) => {
 
         renderer.render(scene, camera);
 
+        whiteSpheres.forEach((sphere) => {
+          const radius = sphere.geometry.boundingSphere?.radius ?? 0.1;
+          const distance = camera.position.distanceTo(sphere.position);
+
+          const distanceRadiusFactor = distance / radius / 500;
+          const scaleFactor = Math.max(distance / radius / 500, 1);
+
+          if (distanceRadiusFactor < 1) {
+            sphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
+          }
+
+          console.log(scaleFactor);
+
+          sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        });
+
         spheres.forEach((sphere) => {
           const radius = sphere.geometry.boundingSphere?.radius ?? 0.1;
           const distance = camera.position.distanceTo(sphere.position);
@@ -212,15 +225,17 @@ const Visualizer = ({ user }: Props) => {
       const y = userInfo?.positionY / factor;
       const z = userInfo?.positionZ / factor;
 
-      loader.load('Rocket.obj', (obj) => {
-        scene.add(obj);
-        objects.push(obj);
-        obj.position.x = x;
-        obj.position.y = y;
-        obj.position.z = z;
-        const scale = 0.001;
-        obj.scale.set(scale, scale, scale);
-      });
+      if (userInfo.status === 0) {
+        loader.load('Rocket.obj', (obj) => {
+          scene.add(obj);
+          objects.push(obj);
+          obj.position.x = x;
+          obj.position.y = y;
+          obj.position.z = z;
+          const scale = 0.001;
+          obj.scale.set(scale, scale, scale);
+        });
+      }
 
       const light = new THREE.PointLight(0xffffff, 1, 100000);
       light.position.set(0, 0, 0);
@@ -275,26 +290,34 @@ const Visualizer = ({ user }: Props) => {
         const y = planet.positionY / factor;
         const z = planet.positionZ / factor;
         const radius = planet.radius ? planet.radius / factor : 0.005;
-        const geometry = new THREE.SphereGeometry(radius, 32, 16);
 
-        let material: THREE.Material;
         if (planet.name === 'Earth') {
-          material = new THREE.MeshStandardMaterial({
+          const geometry = new THREE.SphereGeometry(radius, 32, 16);
+          const material = new THREE.MeshStandardMaterial({
             map: new THREE.TextureLoader().load('models/earth.jpg'),
           });
-        } else {
-          material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+          const sphere = new THREE.Mesh(geometry, material);
+          sphere.position.x = x;
+          sphere.position.y = y;
+          sphere.position.z = z;
+          scene.add(sphere);
+          spheres.push(sphere);
+          outlinePass.selectedObjects.push(sphere);
         }
 
-        const sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
-        spheres.push(sphere);
+        const geometry = new THREE.SphereGeometry(radius, 32, 16);
 
-        outlinePass.selectedObjects.push(sphere);
+        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-        sphere.position.x = x;
-        sphere.position.y = y;
-        sphere.position.z = z;
+        const whiteSphere = new THREE.Mesh(geometry, material);
+        whiteSphere.material.transparent = true;
+        scene.add(whiteSphere);
+        whiteSpheres.push(whiteSphere);
+
+        whiteSphere.position.x = x;
+        whiteSphere.position.y = y;
+        whiteSphere.position.z = z;
 
         const orbiting = planet.orbiting;
         const orbX = (orbiting?.positionX ?? 0) / factor;
