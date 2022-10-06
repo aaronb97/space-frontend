@@ -121,7 +121,10 @@ const Visualizer = ({ user }: Props) => {
 
   useEffect(() => {
     if (userInfo) {
-      const users: Record<string, UserData> = {};
+      const users: Record<string, UserData> = {
+        [userInfo.username]: userInfo,
+      };
+
       userInfo.groups.forEach((group) =>
         group.users.forEach((user) => {
           users[user.username] = user;
