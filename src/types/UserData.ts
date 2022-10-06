@@ -26,4 +26,6 @@ export interface UserData {
   visitedPlanets: Planet[];
   groups: UserGroup[];
   color: string;
+  xp: number;
+  level: number;
 }

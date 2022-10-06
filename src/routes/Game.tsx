@@ -131,9 +131,7 @@ export function Game({ user }: Props) {
         <Header>
           <div>
             {isAnonymous ? (
-              <div>
-                Signed in as Guest (<ColoredUsername userInfo={userInfo} />)
-              </div>
+              <div>Signed in as Guest</div>
             ) : (
               <>
                 <div>

@@ -187,7 +187,6 @@ const Visualizer = ({ user }: Props) => {
       light.position.set(0, 0, 0);
       scene.add(light);
 
-      // scene.add(userText);
       controls.target.set(x, y, z);
 
       if (currentPlanetId !== userInfo.planet.id) {
@@ -272,6 +271,7 @@ const Visualizer = ({ user }: Props) => {
 
         const m = new THREE.LineBasicMaterial({ color: 0x666666 });
         const l = new THREE.Line(g, m);
+        l.position.z = (orbiting?.positionZ ?? 0) / factor;
         l.material.blending = AdditiveBlending;
 
         l.rotateY(
@@ -280,7 +280,9 @@ const Visualizer = ({ user }: Props) => {
             planet.positionX,
             planet.positionY,
             planet.positionZ,
-          ).angleTo(new Vector3(planet.positionX, planet.positionY, 0)),
+          ).angleTo(
+            new Vector3(planet.positionX, planet.positionY, planet.positionZ),
+          ),
         );
 
         scene.add(l);

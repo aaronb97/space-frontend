@@ -24,7 +24,7 @@ interface Props {
 }
 
 export const GroupsDisplay = ({ group }: Props) => {
-  const users = group.users;
+  const users = group.users.sort((a, b) => b.level - a.level);
   const [showClipboardNotif, setShowClipboardNotif] = useState(false);
 
   return (
