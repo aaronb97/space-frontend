@@ -128,22 +128,45 @@ export const NavigationPanel = ({
           />
         )}
         {selectedPlanet && (
-          <div>
-            <button
-              onClick={() => {
-                client
-                  .updateTravelingTo(selectedPlanet)
-                  .then(async () => {
-                    await invalidateUserInfo();
-                    setSelectedPlanet('');
-                  })
-                  .catch((e) => console.error(e));
-              }}
-            >
-              Go to{' '}
-              {planets?.find((planet) => planet.id === selectedPlanet)?.name}
-            </button>
-          </div>
+          <>
+            <div>
+              <button
+                onClick={() => {
+                  client
+                    .updateTravelingTo(selectedPlanet)
+                    .then(async () => {
+                      await invalidateUserInfo();
+                      setSelectedPlanet('');
+                    })
+                    .catch((e) => console.error(e));
+                }}
+              >
+                Go to{' '}
+                {planets?.find((planet) => planet.id === selectedPlanet)?.name}
+              </button>
+            </div>
+            {userInfo.godmode && (
+              <div>
+                <button
+                  onClick={() => {
+                    client
+                      .teleport(selectedPlanet)
+                      .then(async () => {
+                        await invalidateUserInfo();
+                        setSelectedPlanet('');
+                      })
+                      .catch((e) => console.error(e));
+                  }}
+                >
+                  Teleport to{' '}
+                  {
+                    planets?.find((planet) => planet.id === selectedPlanet)
+                      ?.name
+                  }
+                </button>
+              </div>
+            )}
+          </>
         )}
       </FlexContainer>
       <CenterText>

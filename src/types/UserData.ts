@@ -21,6 +21,7 @@ export interface UserData {
   }>;
   speedBoostAvailable: boolean;
   notification?: string;
+  godmode: boolean;
 
   planet: Planet;
   visitedPlanets: Planet[];

@@ -22,6 +22,12 @@ class Client {
     return await this.post(`travelingTo/${id}`);
   }
 
+  async teleport(
+    id: string | number,
+  ): Promise<AxiosResponse<UserData> | undefined> {
+    return await this.post(`teleport/${id}`);
+  }
+
   async getPlanets(): Promise<AxiosResponse<Planet[]> | undefined> {
     return await this.get('planets');
   }

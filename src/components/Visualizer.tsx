@@ -16,6 +16,11 @@ import { calculateDist } from '../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../types/UserData';
 
+const modelNames: Record<string, string> = {
+  Earth: 'models/earth.jpg',
+  Jupiter: 'models/jupiter.jpg',
+};
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -177,6 +182,7 @@ const Visualizer = ({ user }: Props) => {
         renderer.render(scene, camera);
 
         spheres.forEach(({ whiteSphere, materialSphere }) => {
+          if (isNaN(camera.position.x)) return;
           const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
           const distance = camera.position.distanceTo(whiteSphere.position);
 
@@ -239,10 +245,11 @@ const Visualizer = ({ user }: Props) => {
 
       if (currentPlanetId !== userInfo.planet.id) {
         console.log('TRIGGER CAMERA PAN');
-        const distance = Math.max(
-          calculateDist(userInfo, userInfo.planet) / factor,
-          2,
-        );
+
+        const travelingFactor = userInfo.status === 1 ? 5 : 1;
+        const distance =
+          Math.max(calculateDist(userInfo, userInfo.planet) / factor, 2) /
+          travelingFactor;
 
         const [xRand, yRand, zRand] = [
           Math.random() - 0.5,
@@ -285,10 +292,11 @@ const Visualizer = ({ user }: Props) => {
         const z = planet.positionZ / factor;
         const radius = planet.radius ? planet.radius / factor : 0.005;
 
-        if (planet.name === 'Earth') {
+        if (modelNames[planet.name]) {
+          const modelName = modelNames[planet.name];
           const geometry = new THREE.SphereGeometry(radius, 32, 16);
           const material = new THREE.MeshStandardMaterial({
-            map: new THREE.TextureLoader().load('models/earth.jpg'),
+            map: new THREE.TextureLoader().load(modelName),
           });
 
           const whiteMaterial = new THREE.MeshBasicMaterial({
