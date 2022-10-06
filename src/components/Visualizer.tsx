@@ -75,10 +75,8 @@ interface Props {
 
 const sqr = (num: number) => Math.pow(num, 2);
 
-const whiteSpheres: Array<THREE.Mesh<THREE.SphereGeometry, THREE.Material>> =
-  [];
-
-const spheres: Array<THREE.Mesh<THREE.SphereGeometry, THREE.Material>> = [];
+type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
+const spheres: Array<{ whiteSphere: Sphere; materialSphere?: Sphere }> = [];
 
 const objects: THREE.Group[] = [];
 
@@ -178,29 +176,25 @@ const Visualizer = ({ user }: Props) => {
 
         renderer.render(scene, camera);
 
-        whiteSpheres.forEach((sphere) => {
-          const radius = sphere.geometry.boundingSphere?.radius ?? 0.1;
-          const distance = camera.position.distanceTo(sphere.position);
+        spheres.forEach(({ whiteSphere, materialSphere }) => {
+          const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
+          const distance = camera.position.distanceTo(whiteSphere.position);
 
           const distanceRadiusFactor = distance / radius / 500;
           const scaleFactor = Math.max(distance / radius / 500, 1);
 
-          if (distanceRadiusFactor < 1) {
-            sphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
+          if (materialSphere) {
+            console.log(distanceRadiusFactor);
           }
 
-          console.log(scaleFactor);
+          if (distanceRadiusFactor < 1 && materialSphere) {
+            scene.add(materialSphere);
+            whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
+          } else if (materialSphere) {
+            scene.remove(materialSphere);
+          }
 
-          sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        });
-
-        spheres.forEach((sphere) => {
-          const radius = sphere.geometry.boundingSphere?.radius ?? 0.1;
-          const distance = camera.position.distanceTo(sphere.position);
-
-          const scaleFactor = Math.max(distance / radius / 500, 1);
-
-          sphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+          whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
         });
 
         controls.update();
@@ -297,27 +291,38 @@ const Visualizer = ({ user }: Props) => {
             map: new THREE.TextureLoader().load('models/earth.jpg'),
           });
 
-          const sphere = new THREE.Mesh(geometry, material);
-          sphere.position.x = x;
-          sphere.position.y = y;
-          sphere.position.z = z;
-          scene.add(sphere);
-          spheres.push(sphere);
-          outlinePass.selectedObjects.push(sphere);
+          const whiteMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+          });
+
+          const whiteSphere = new THREE.Mesh(geometry, whiteMaterial);
+
+          const materialSphere = new THREE.Mesh(geometry, material);
+          materialSphere.position.x = x;
+          materialSphere.position.y = y;
+          materialSphere.position.z = z;
+          whiteSphere.position.x = x;
+          whiteSphere.position.y = y;
+          whiteSphere.position.z = z;
+          scene.add(whiteSphere);
+
+          spheres.push({ materialSphere, whiteSphere });
+          outlinePass.selectedObjects.push(materialSphere);
+        } else {
+          const geometry = new THREE.SphereGeometry(radius, 32, 16);
+          const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+          const whiteSphere = new THREE.Mesh(geometry, material);
+          whiteSphere.material.transparent = true;
+          scene.add(whiteSphere);
+
+          whiteSphere.position.x = x;
+          whiteSphere.position.y = y;
+          whiteSphere.position.z = z;
+
+          spheres.push({ whiteSphere });
         }
-
-        const geometry = new THREE.SphereGeometry(radius, 32, 16);
-
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-        const whiteSphere = new THREE.Mesh(geometry, material);
-        whiteSphere.material.transparent = true;
-        scene.add(whiteSphere);
-        whiteSpheres.push(whiteSphere);
-
-        whiteSphere.position.x = x;
-        whiteSphere.position.y = y;
-        whiteSphere.position.z = z;
 
         const orbiting = planet.orbiting;
         const orbX = (orbiting?.positionX ?? 0) / factor;
