@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
@@ -9,6 +9,7 @@ import { User } from 'firebase/auth';
 import { AdditiveBlending, Vector3 } from 'three';
 import { calculateDist } from '../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
+import { UserData } from '../types/UserData';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -56,12 +57,11 @@ const Visualizer = ({ user }: Props) => {
 
   const { current: intervals } = useRef<NodeJS.Timer[]>([]);
 
-  useEffect(() => {
-    if (userInfo) {
-      intervals.forEach((interval) => clearInterval(interval));
+  const startCircles = useCallback(
+    (userToCircle: UserData) => {
       const interval = setInterval(() => {
         const m = new THREE.LineBasicMaterial({
-          color: userInfo.color,
+          color: userToCircle.color,
           transparent: true,
         });
 
@@ -76,9 +76,9 @@ const Visualizer = ({ user }: Props) => {
               positionZ: camera.position.z,
             },
             {
-              positionX: userInfo.positionX / factor,
-              positionY: userInfo.positionY / factor,
-              positionZ: userInfo.positionZ / factor,
+              positionX: userToCircle.positionX / factor,
+              positionY: userToCircle.positionY / factor,
+              positionZ: userToCircle.positionZ / factor,
             },
           ) / 750;
 
@@ -91,8 +91,8 @@ const Visualizer = ({ user }: Props) => {
             const newg = new THREE.BufferGeometry().setFromPoints(
               new THREE.Path()
                 .absarc(
-                  userInfo?.positionX / factor,
-                  userInfo?.positionY / factor,
+                  userToCircle?.positionX / factor,
+                  userToCircle?.positionY / factor,
                   r * dist,
                   0,
                   Math.PI * 2,
@@ -102,7 +102,7 @@ const Visualizer = ({ user }: Props) => {
             );
 
             l.geometry = newg;
-            l.position.z = userInfo.positionZ / factor;
+            l.position.z = userToCircle.positionZ / factor;
             l.material.opacity = dist > 0.001 ? 10 - r : 0;
           })
           .easing(TWEEN.Easing.Quadratic.Out)
@@ -115,6 +115,23 @@ const Visualizer = ({ user }: Props) => {
       }, 1000);
 
       intervals.push(interval);
+    },
+    [intervals],
+  );
+
+  useEffect(() => {
+    if (userInfo) {
+      const users: Record<string, UserData> = {};
+      userInfo.groups.forEach((group) =>
+        group.users.forEach((user) => {
+          users[user.username] = user;
+        }),
+      );
+
+      intervals.forEach((interval) => clearInterval(interval));
+      for (const user of Object.values(users)) {
+        startCircles(user);
+      }
     }
 
     if (!ref.current?.contains(renderer.domElement)) {
@@ -144,11 +161,10 @@ const Visualizer = ({ user }: Props) => {
       scene.clear();
       intervals.forEach((interval) => clearInterval(interval));
     };
-  }, [intervals, planets, userInfo]);
+  }, [intervals, planets, startCircles, userInfo]);
 
   useEffect(() => {
     if (planets?.length && userInfo) {
-      console.log('REBUILD SCENE');
       scene.clear();
       const x = userInfo?.positionX / factor;
       const y = userInfo?.positionY / factor;
