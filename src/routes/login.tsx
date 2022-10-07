@@ -75,8 +75,18 @@ export function Login() {
           onChange={(e) => setPassword(e.target.value)}
           type="password"
         />
-        <button onClick={onClickEmailSignIn}>Sign In</button>
-        <button onClick={onClickEmailSignUp}>Sign Up</button>
+        <button
+          onClick={onClickEmailSignIn}
+          disabled={!email || !password}
+        >
+          Sign In
+        </button>
+        <button
+          onClick={onClickEmailSignUp}
+          disabled={!email || !password}
+        >
+          Sign Up
+        </button>
         <button onClick={() => setEmailClicked(false)}>Back</button>
       </Container>
     );
