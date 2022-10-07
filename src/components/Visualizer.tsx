@@ -39,8 +39,6 @@ const camera = new THREE.PerspectiveCamera(
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.BasicShadowMap;
 
 const composer = new EffectComposer(renderer);
 
@@ -240,14 +238,6 @@ const Visualizer = ({ user }: Props) => {
 
       if (userInfo.status === 0) {
         loader.load('Rocket.obj', (obj) => {
-          obj.castShadow = true;
-          obj.receiveShadow = true;
-          obj.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-              child.castShadow = true;
-            }
-          });
-
           scene.add(obj);
           objects.push(obj);
           obj.position.x = x;
@@ -256,13 +246,9 @@ const Visualizer = ({ user }: Props) => {
           const scale = 0.001;
           obj.scale.set(scale, scale, scale);
 
-          const light = new THREE.DirectionalLight(0xffffff, 0.7);
-          light.castShadow = true;
+          const light = new THREE.PointLight(0xffffff, 0.6);
           light.position.set(0, 0, 0);
-          light.target = obj;
           scene.add(light);
-          const helper = new THREE.CameraHelper(light.shadow.camera);
-          scene.add(helper);
         });
       }
 
@@ -347,11 +333,6 @@ const Visualizer = ({ user }: Props) => {
           whiteSphere.position.y = y;
           whiteSphere.position.z = z;
           scene.add(whiteSphere);
-
-          if (planet.name !== 'The Sun') {
-            materialSphere.receiveShadow = true;
-            materialSphere.castShadow = true;
-          }
 
           spheres.push({ materialSphere, whiteSphere });
           outlinePass.selectedObjects.push(materialSphere);
