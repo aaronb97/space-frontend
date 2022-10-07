@@ -11,7 +11,7 @@ import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import { User } from 'firebase/auth';
-import { Mesh, Vector3 } from 'three';
+import { AdditiveBlending, Mesh, Vector3 } from 'three';
 import { calculateDist } from '../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../types/UserData';
@@ -397,6 +397,7 @@ const Visualizer = ({ user }: Props) => {
           );
 
           l.material.transparent = true;
+          l.material.blending = AdditiveBlending;
           scene.add(l);
           last.line = l;
         }
