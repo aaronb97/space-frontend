@@ -17,8 +17,16 @@ import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../types/UserData';
 
 const modelNames: Record<string, string> = {
+  'The Sun': 'models/sun.jpg',
+  Mercury: 'models/mercury.jpg',
+  Venus: 'models/venus.jpg',
   Earth: 'models/earth.jpg',
   Jupiter: 'models/jupiter.jpg',
+  Mars: 'models/mars.jpg',
+  'The Moon': 'models/moon.jpg',
+  Saturn: 'models/saturn.jpg',
+  Uranus: 'models/uranus.jpg',
+  Neptune: 'models/neptune.jpg',
 };
 
 const scene = new THREE.Scene();
@@ -31,6 +39,8 @@ const camera = new THREE.PerspectiveCamera(
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.BasicShadowMap;
 
 const composer = new EffectComposer(renderer);
 
@@ -81,7 +91,11 @@ interface Props {
 const sqr = (num: number) => Math.pow(num, 2);
 
 type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
-const spheres: Array<{ whiteSphere: Sphere; materialSphere?: Sphere }> = [];
+const spheres: Array<{
+  whiteSphere: Sphere;
+  materialSphere?: Sphere;
+  line?: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
+}> = [];
 
 const objects: THREE.Group[] = [];
 
@@ -181,7 +195,7 @@ const Visualizer = ({ user }: Props) => {
 
         renderer.render(scene, camera);
 
-        spheres.forEach(({ whiteSphere, materialSphere }) => {
+        spheres.forEach(({ whiteSphere, materialSphere, line }) => {
           if (isNaN(camera.position.x)) return;
           const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
           const distance = camera.position.distanceTo(whiteSphere.position);
@@ -189,13 +203,12 @@ const Visualizer = ({ user }: Props) => {
           const distanceRadiusFactor = distance / radius / 500;
           const scaleFactor = Math.max(distance / radius / 500, 1);
 
-          if (materialSphere) {
-            console.log(distanceRadiusFactor);
-          }
-
           if (distanceRadiusFactor < 1 && materialSphere) {
             scene.add(materialSphere);
             whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
+            if (line) {
+              line.material.opacity = Math.pow(distanceRadiusFactor, 3);
+            }
           } else if (materialSphere) {
             scene.remove(materialSphere);
           }
@@ -227,6 +240,14 @@ const Visualizer = ({ user }: Props) => {
 
       if (userInfo.status === 0) {
         loader.load('Rocket.obj', (obj) => {
+          obj.castShadow = true;
+          obj.receiveShadow = true;
+          obj.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+              child.castShadow = true;
+            }
+          });
+
           scene.add(obj);
           objects.push(obj);
           obj.position.x = x;
@@ -234,22 +255,28 @@ const Visualizer = ({ user }: Props) => {
           obj.position.z = z;
           const scale = 0.001;
           obj.scale.set(scale, scale, scale);
+
+          const light = new THREE.DirectionalLight(0xffffff, 0.7);
+          light.castShadow = true;
+          light.position.set(0, 0, 0);
+          light.target = obj;
+          scene.add(light);
+          const helper = new THREE.CameraHelper(light.shadow.camera);
+          scene.add(helper);
         });
       }
 
-      const light = new THREE.PointLight(0xffffff, 1, 100000);
-      light.position.set(0, 0, 0);
-      scene.add(light);
-
       controls.target.set(x, y, z);
+
+      scene.add(new THREE.AmbientLight(0x101010));
 
       if (currentPlanetId !== userInfo.planet.id) {
         console.log('TRIGGER CAMERA PAN');
 
-        const travelingFactor = userInfo.status === 1 ? 5 : 1;
         const distance =
-          Math.max(calculateDist(userInfo, userInfo.planet) / factor, 2) /
-          travelingFactor;
+          userInfo.status === 0
+            ? 0.01
+            : (userInfo.planet.radius || 5000) / 500000;
 
         const [xRand, yRand, zRand] = [
           Math.random() - 0.5,
@@ -279,8 +306,8 @@ const Visualizer = ({ user }: Props) => {
           .onUpdate((newCoords) => {
             camera.position.set(newCoords.x, newCoords.y, newCoords.z);
           })
-          .easing(TWEEN.Easing.Quartic.InOut)
-          .duration(10000)
+          .easing(TWEEN.Easing.Quartic.Out)
+          .duration(5000)
           .start();
 
         setCurrentPlanetId(userInfo.planet.id);
@@ -295,7 +322,13 @@ const Visualizer = ({ user }: Props) => {
         if (modelNames[planet.name]) {
           const modelName = modelNames[planet.name];
           const geometry = new THREE.SphereGeometry(radius, 32, 16);
-          const material = new THREE.MeshStandardMaterial({
+
+          const MaterialType =
+            planet.name !== 'The Sun'
+              ? THREE.MeshStandardMaterial
+              : THREE.MeshBasicMaterial;
+
+          const material = new MaterialType({
             map: new THREE.TextureLoader().load(modelName),
           });
 
@@ -315,6 +348,11 @@ const Visualizer = ({ user }: Props) => {
           whiteSphere.position.z = z;
           scene.add(whiteSphere);
 
+          if (planet.name !== 'The Sun') {
+            materialSphere.receiveShadow = true;
+            materialSphere.castShadow = true;
+          }
+
           spheres.push({ materialSphere, whiteSphere });
           outlinePass.selectedObjects.push(materialSphere);
         } else {
@@ -332,44 +370,49 @@ const Visualizer = ({ user }: Props) => {
           spheres.push({ whiteSphere });
         }
 
-        const orbiting = planet.orbiting;
-        const orbX = (orbiting?.positionX ?? 0) / factor;
-        const orbY = (orbiting?.positionY ?? 0) / factor;
-        const orbZ = (orbiting?.positionZ ?? 0) / factor;
-        const orbitRadius = Math.sqrt(
-          sqr(x - orbX) + sqr(y - orbY) + sqr(z - orbZ),
-        );
+        if (planet.orbiting) {
+          const last = spheres[spheres.length - 1];
 
-        const g = new THREE.BufferGeometry().setFromPoints(
-          new THREE.Path()
-            .absarc(
-              planet.orbiting ? planet.orbiting.positionX / factor : 0,
-              planet.orbiting ? planet.orbiting.positionY / factor : 0,
-              orbitRadius,
-              0,
-              Math.PI * 2,
-              false,
-            )
-            .getSpacedPoints(10000),
-        );
+          const orbiting = planet.orbiting;
+          const orbX = (orbiting?.positionX ?? 0) / factor;
+          const orbY = (orbiting?.positionY ?? 0) / factor;
+          const orbZ = (orbiting?.positionZ ?? 0) / factor;
+          const orbitRadius = Math.sqrt(
+            sqr(x - orbX) + sqr(y - orbY) + sqr(z - orbZ),
+          );
 
-        const m = new THREE.LineBasicMaterial({ color: 0x666666 });
-        const l = new THREE.Line(g, m);
-        l.position.z = (orbiting?.positionZ ?? 0) / factor;
-        // l.material.blending = AdditiveBlending;
+          const g = new THREE.BufferGeometry().setFromPoints(
+            new THREE.Path()
+              .absarc(
+                planet.orbiting ? planet.orbiting.positionX / factor : 0,
+                planet.orbiting ? planet.orbiting.positionY / factor : 0,
+                orbitRadius,
+                0,
+                Math.PI * 2,
+                false,
+              )
+              .getSpacedPoints(10000),
+          );
 
-        l.rotateY(
-          // this is bogus
-          new Vector3(
-            planet.positionX,
-            planet.positionY,
-            planet.positionZ,
-          ).angleTo(
-            new Vector3(planet.positionX, planet.positionY, planet.positionZ),
-          ),
-        );
+          const m = new THREE.LineBasicMaterial({ color: 0x666666 });
+          const l = new THREE.Line(g, m);
+          l.position.z = (orbiting?.positionZ ?? 0) / factor;
 
-        scene.add(l);
+          l.rotateY(
+            // this is bogus
+            new Vector3(
+              planet.positionX,
+              planet.positionY,
+              planet.positionZ,
+            ).angleTo(
+              new Vector3(planet.positionX, planet.positionY, planet.positionZ),
+            ),
+          );
+
+          l.material.transparent = true;
+          scene.add(l);
+          last.line = l;
+        }
       }
     }
 
