@@ -82,6 +82,8 @@ controls.autoRotateSpeed = 0.1;
 
 const factor = 1000000;
 
+let sky: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>;
+
 interface Props {
   user: User;
 }
@@ -227,18 +229,27 @@ const Visualizer = ({ user }: Props) => {
     }
 
     return () => {
-      scene.clear();
+      scene.remove.apply(scene, scene.children);
       intervals.forEach((interval) => clearInterval(interval));
     };
   }, [intervals, planets, startCircles, userInfo]);
 
   useEffect(() => {
     if (planets?.length && userInfo) {
-      scene.clear();
-      // outlinePass.selectedObjects = [];
+      scene.remove.apply(scene, scene.children);
+      const skyGeo = new THREE.SphereGeometry(1000000, 25, 25);
+      const skyTexture = new THREE.TextureLoader().load('models/space.jpg');
+      const spaceMaterial = new THREE.MeshBasicMaterial({ map: skyTexture });
+      sky = new THREE.Mesh(skyGeo, spaceMaterial);
+      sky.material.side = THREE.DoubleSide;
+      scene.add(sky);
       const x = userInfo?.positionX / factor;
       const y = userInfo?.positionY / factor;
       const z = userInfo?.positionZ / factor;
+
+      sky.position.x = x;
+      sky.position.y = y;
+      sky.position.z = z;
 
       if (userInfo.status === 0) {
         loader.load('Rocket.obj', (obj) => {
@@ -419,7 +430,7 @@ const Visualizer = ({ user }: Props) => {
     }
 
     return () => {
-      scene.clear();
+      scene.remove.apply(scene, scene.children);
     };
   }, [currentPlanetId, planets, userInfo]);
 
