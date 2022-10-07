@@ -30,7 +30,6 @@ const Center = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 500px;
 `;
 
 const Header = styled.header`
