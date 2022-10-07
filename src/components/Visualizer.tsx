@@ -240,8 +240,6 @@ const Visualizer = ({ user }: Props) => {
       if (rocketObj && userInfo) {
         const deltaT = (timestamp - lastTimestamp) / 1000 / 60 / 60;
 
-        console.log(userInfo.velocityX);
-
         const xDiff = (userInfo.velocityX * deltaT) / factor;
         const yDiff = (userInfo.velocityY * deltaT) / factor;
         const zDiff = (userInfo.velocityZ * deltaT) / factor;
