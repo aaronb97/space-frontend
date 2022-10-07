@@ -70,15 +70,14 @@ composer.addPass(outlinePass);
 
 const loader = new OBJLoader();
 
-camera.position.x = 0;
-camera.position.y = 0;
-camera.position.z = 1000;
-
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.1;
+
+let sky: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | undefined;
+let rocketObj: THREE.Group | undefined;
 
 const factor = 1000000;
 
@@ -98,8 +97,6 @@ const planetObjects: Record<
     line?: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
   }
 > = {};
-
-const objects: THREE.Group[] = [];
 
 const Visualizer = ({ user }: Props) => {
   const { planets } = usePlanets();
@@ -192,6 +189,38 @@ const Visualizer = ({ user }: Props) => {
 
     if (!ref.current?.contains(renderer.domElement)) {
       ref.current?.appendChild(renderer.domElement);
+      if (userInfo) {
+        const distance =
+          userInfo.status === 0
+            ? 0.01
+            : (userInfo.planet.radius || 5000) / 500000;
+
+        const [xRand, yRand, zRand] = [
+          Math.random() - 0.5,
+          Math.random() - 0.5,
+          Math.random() / 2,
+        ];
+
+        const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
+        const [xNorm, yNorm, zNorm] = [
+          xRand * normal,
+          yRand * normal,
+          zRand * normal,
+        ];
+
+        const x = userInfo.positionX / factor;
+        const y = userInfo.positionY / factor;
+        const z = userInfo.positionZ / factor;
+
+        camera.position.set(
+          x + distance * xNorm,
+          y + distance * yNorm,
+          z + distance * zNorm,
+        );
+
+        camera.lookAt(x, y, z);
+      }
+
       const animate = () => {
         requestAnimationFrame(animate);
 
@@ -231,22 +260,79 @@ const Visualizer = ({ user }: Props) => {
 
       animate();
     }
-
-    return () => {
-      scene.remove.apply(scene, scene.children);
-      intervals.forEach((interval) => clearInterval(interval));
-    };
   }, [intervals, planets, startCircles, userInfo]);
 
   useEffect(() => {
+    const obj = rocketObj;
+
+    if (userInfo && obj) {
+      const x = userInfo?.positionX / factor;
+      const y = userInfo?.positionY / factor;
+      const z = userInfo?.positionZ / factor;
+
+      obj.position.x = x;
+      obj.position.y = y;
+      obj.position.z = z;
+
+      obj.traverse((subObj) => {
+        if (subObj instanceof Mesh) {
+          subObj.material.color.set(userInfo.color);
+          subObj.lookAt(
+            new Vector3(
+              userInfo.planet.positionX / factor,
+              userInfo.planet.positionY / factor,
+              userInfo.planet.positionZ / factor,
+            ),
+          );
+
+          subObj.rotateX(1.5708);
+        }
+      });
+
+      controls.target.set(x, y, z);
+
+      const scale = 0.001;
+      obj.scale.set(scale, scale, scale);
+    }
+  }, [
+    userInfo,
+    userInfo?.color,
+    userInfo?.planet.positionX,
+    userInfo?.planet.positionY,
+    userInfo?.planet.positionZ,
+    userInfo?.positionX,
+    userInfo?.positionY,
+    userInfo?.positionZ,
+  ]);
+
+  useEffect(() => {
+    if (rocketObj) {
+      if (userInfo?.status === 0) {
+        rocketObj.traverse((obj) => {
+          if (obj instanceof Mesh) {
+            obj.material.opacity = 1;
+          }
+        });
+      } else {
+        rocketObj.traverse((obj) => {
+          if (obj instanceof Mesh) {
+            obj.material.opacity = 0;
+          }
+        });
+      }
+    }
+  }, [userInfo?.status]);
+
+  useEffect(() => {
     if (planets?.length && userInfo) {
-      scene.remove.apply(scene, scene.children);
-      const skyGeo = new THREE.SphereGeometry(1000000, 25, 25);
-      const skyTexture = new THREE.TextureLoader().load('models/space.jpg');
-      const spaceMaterial = new THREE.MeshBasicMaterial({ map: skyTexture });
-      const sky = new THREE.Mesh(skyGeo, spaceMaterial);
-      sky.material.side = THREE.DoubleSide;
-      scene.add(sky);
+      if (!sky) {
+        const skyGeo = new THREE.SphereGeometry(1000000, 25, 25);
+        const skyTexture = new THREE.TextureLoader().load('models/space.jpg');
+        const spaceMaterial = new THREE.MeshBasicMaterial({ map: skyTexture });
+        sky = new THREE.Mesh(skyGeo, spaceMaterial);
+        sky.material.side = THREE.DoubleSide;
+        scene.add(sky);
+      }
 
       const x = userInfo?.positionX / factor;
       const y = userInfo?.positionY / factor;
@@ -256,45 +342,7 @@ const Visualizer = ({ user }: Props) => {
       sky.position.y = y;
       sky.position.z = z;
 
-      if (userInfo.status === 0) {
-        loader.load('Rocket.obj', (obj) => {
-          scene.add(obj);
-          objects.push(obj);
-          obj.position.x = x;
-          obj.position.y = y;
-          obj.position.z = z;
-
-          obj.traverse((subObj) => {
-            if (subObj instanceof Mesh) {
-              subObj.material.color.set(userInfo.color);
-              subObj.lookAt(
-                new Vector3(
-                  userInfo.planet.positionX / factor,
-                  userInfo.planet.positionY / factor,
-                  userInfo.planet.positionZ / factor,
-                ),
-              );
-
-              subObj.rotateX(1.5708);
-            }
-          });
-
-          const scale = 0.001;
-          obj.scale.set(scale, scale, scale);
-        });
-      }
-
-      const light = new THREE.PointLight(0xffffff, 1);
-      light.position.set(0, 0, 0);
-      scene.add(light);
-
-      controls.target.set(x, y, z);
-
-      scene.add(new THREE.AmbientLight(0x101010));
-
-      if (currentPlanetId !== userInfo.planet.id) {
-        console.log('TRIGGER CAMERA PAN');
-
+      if (currentPlanetId && currentPlanetId !== userInfo.planet.id) {
         const distance =
           userInfo.status === 0
             ? 0.01
@@ -331,111 +379,164 @@ const Visualizer = ({ user }: Props) => {
           .easing(TWEEN.Easing.Quartic.Out)
           .duration(5000)
           .start();
-
-        setCurrentPlanetId(userInfo.planet.id);
       }
 
-      for (const planet of planets) {
-        const x = planet.positionX / factor;
-        const y = planet.positionY / factor;
-        const z = planet.positionZ / factor;
-        const radius = planet.radius ? planet.radius / factor : 0.005;
+      setCurrentPlanetId(userInfo.planet.id);
 
-        if (modelNames[planet.name]) {
-          const modelName = modelNames[planet.name];
-          const geometry = new THREE.SphereGeometry(radius, 32, 16);
+      if (Object.keys(planetObjects).length === 0) {
+        if (!rocketObj) {
+          loader.load('Rocket.obj', (obj) => {
+            rocketObj = obj;
+            scene.add(obj);
+            obj.position.x = x;
+            obj.position.y = y;
+            obj.position.z = z;
 
-          const MaterialType =
-            planet.name !== 'The Sun'
-              ? THREE.MeshStandardMaterial
-              : THREE.MeshBasicMaterial;
+            obj.traverse((subObj) => {
+              if (subObj instanceof Mesh) {
+                subObj.material.transparent = true;
+                subObj.material.color.set(userInfo.color);
+                subObj.lookAt(
+                  new Vector3(
+                    userInfo.planet.positionX / factor,
+                    userInfo.planet.positionY / factor,
+                    userInfo.planet.positionZ / factor,
+                  ),
+                );
 
-          const material = new MaterialType({
-            map: new THREE.TextureLoader().load(modelName),
+                subObj.rotateX(1.5708);
+              }
+            });
+
+            const scale = 0.001;
+            obj.scale.set(scale, scale, scale);
           });
-
-          const whiteMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-          });
-
-          const whiteSphere = new THREE.Mesh(geometry, whiteMaterial);
-
-          const materialSphere = new THREE.Mesh(geometry, material);
-          materialSphere.position.x = x;
-          materialSphere.position.y = y;
-          materialSphere.position.z = z;
-          whiteSphere.position.x = x;
-          whiteSphere.position.y = y;
-          whiteSphere.position.z = z;
-          scene.add(whiteSphere);
-
-          planetObjects[planet.name] = { materialSphere, whiteSphere };
-          outlinePass.selectedObjects.push(materialSphere);
-        } else {
-          const geometry = new THREE.SphereGeometry(radius, 32, 16);
-          const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-          const whiteSphere = new THREE.Mesh(geometry, material);
-          whiteSphere.material.transparent = true;
-          scene.add(whiteSphere);
-
-          whiteSphere.position.x = x;
-          whiteSphere.position.y = y;
-          whiteSphere.position.z = z;
-
-          planetObjects[planet.name] = { whiteSphere };
         }
 
-        if (planet.orbiting) {
-          const orbiting = planet.orbiting;
-          const orbX = (orbiting?.positionX ?? 0) / factor;
-          const orbY = (orbiting?.positionY ?? 0) / factor;
-          const orbZ = (orbiting?.positionZ ?? 0) / factor;
-          const orbitRadius = Math.sqrt(
-            sqr(x - orbX) + sqr(y - orbY) + sqr(z - orbZ),
-          );
+        const light = new THREE.PointLight(0xffffff, 1);
+        light.position.set(0, 0, 0);
+        scene.add(light);
 
-          const g = new THREE.BufferGeometry().setFromPoints(
-            new THREE.Path()
-              .absarc(
-                planet.orbiting ? planet.orbiting.positionX / factor : 0,
-                planet.orbiting ? planet.orbiting.positionY / factor : 0,
-                orbitRadius,
-                0,
-                Math.PI * 2,
-                false,
-              )
-              .getSpacedPoints(10000),
-          );
+        controls.target.set(x, y, z);
 
-          const m = new THREE.LineBasicMaterial({ color: 0x666666 });
-          const l = new THREE.Line(g, m);
-          l.position.z = (orbiting?.positionZ ?? 0) / factor;
+        scene.add(new THREE.AmbientLight(0x101010));
 
-          l.rotateY(
-            // this is bogus
-            new Vector3(
-              planet.positionX,
-              planet.positionY,
-              planet.positionZ,
-            ).angleTo(
-              new Vector3(planet.positionX, planet.positionY, planet.positionZ),
-            ),
-          );
+        for (const planet of planets) {
+          const x = planet.positionX / factor;
+          const y = planet.positionY / factor;
+          const z = planet.positionZ / factor;
+          const radius = planet.radius ? planet.radius / factor : 0.005;
 
-          l.material.transparent = true;
-          l.material.blending = AdditiveBlending;
-          scene.add(l);
-          planetObjects[planet.name].line = l;
+          if (modelNames[planet.name]) {
+            const modelName = modelNames[planet.name];
+            const geometry = new THREE.SphereGeometry(radius, 32, 16);
+
+            const MaterialType =
+              planet.name !== 'The Sun'
+                ? THREE.MeshStandardMaterial
+                : THREE.MeshBasicMaterial;
+
+            const material = new MaterialType({
+              map: new THREE.TextureLoader().load(modelName),
+            });
+
+            const whiteMaterial = new THREE.MeshBasicMaterial({
+              color: 0xffffff,
+              transparent: true,
+            });
+
+            const whiteSphere = new THREE.Mesh(geometry, whiteMaterial);
+
+            const materialSphere = new THREE.Mesh(geometry, material);
+            materialSphere.position.x = x;
+            materialSphere.position.y = y;
+            materialSphere.position.z = z;
+            whiteSphere.position.x = x;
+            whiteSphere.position.y = y;
+            whiteSphere.position.z = z;
+            scene.add(whiteSphere);
+
+            planetObjects[planet.name] = { materialSphere, whiteSphere };
+            outlinePass.selectedObjects.push(materialSphere);
+          } else {
+            const geometry = new THREE.SphereGeometry(radius, 32, 16);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+            const whiteSphere = new THREE.Mesh(geometry, material);
+            whiteSphere.material.transparent = true;
+            scene.add(whiteSphere);
+
+            whiteSphere.position.x = x;
+            whiteSphere.position.y = y;
+            whiteSphere.position.z = z;
+
+            planetObjects[planet.name] = { whiteSphere };
+          }
+
+          if (planet.orbiting) {
+            const orbiting = planet.orbiting;
+            const orbX = (orbiting?.positionX ?? 0) / factor;
+            const orbY = (orbiting?.positionY ?? 0) / factor;
+            const orbZ = (orbiting?.positionZ ?? 0) / factor;
+            const orbitRadius = Math.sqrt(
+              sqr(x - orbX) + sqr(y - orbY) + sqr(z - orbZ),
+            );
+
+            const g = new THREE.BufferGeometry().setFromPoints(
+              new THREE.Path()
+                .absarc(
+                  planet.orbiting ? planet.orbiting.positionX / factor : 0,
+                  planet.orbiting ? planet.orbiting.positionY / factor : 0,
+                  orbitRadius,
+                  0,
+                  Math.PI * 2,
+                  false,
+                )
+                .getSpacedPoints(10000),
+            );
+
+            const m = new THREE.LineBasicMaterial({ color: 0x666666 });
+            const l = new THREE.Line(g, m);
+            l.position.z = (orbiting?.positionZ ?? 0) / factor;
+
+            l.rotateY(
+              // this is bogus
+              new Vector3(
+                planet.positionX,
+                planet.positionY,
+                planet.positionZ,
+              ).angleTo(
+                new Vector3(
+                  planet.positionX,
+                  planet.positionY,
+                  planet.positionZ,
+                ),
+              ),
+            );
+
+            l.material.transparent = true;
+            l.material.blending = AdditiveBlending;
+            scene.add(l);
+            planetObjects[planet.name].line = l;
+          }
         }
       }
     }
+  }, [currentPlanetId, planets, userInfo]);
 
+  useEffect(() => {
     return () => {
       scene.remove.apply(scene, scene.children);
+      sky = undefined;
+      for (const key of Object.keys(planetObjects)) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete planetObjects[key];
+      }
+
+      rocketObj = undefined;
+      intervals.forEach((interval) => clearInterval(interval));
     };
-  }, [currentPlanetId, planets, userInfo]);
+  }, [intervals]);
 
   return <div ref={ref} />;
 };
