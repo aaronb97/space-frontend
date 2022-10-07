@@ -123,6 +123,11 @@ export function Game({ user }: Props) {
     return <div>Loading...</div>;
   }
 
+  const notifications = [notification, groupNotification];
+  if (window.location.href.includes('netlify')) {
+    notifications.push('Space Game has moved! Check out spacegame.io');
+  }
+
   return (
     <>
       <Visualizer user={user} />
@@ -152,9 +157,7 @@ export function Game({ user }: Props) {
               <NavigationPanel
                 userInfo={userInfo}
                 planets={planets}
-                notifications={[notification, groupNotification].filter(
-                  Boolean,
-                )}
+                notifications={notifications.filter(Boolean)}
               />
             )}
             {selectedPanel === 'items' && <ItemsPanel userInfo={userInfo} />}
