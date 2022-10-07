@@ -33,7 +33,7 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
-  0.001,
+  0.0001,
   50000,
 );
 
@@ -98,9 +98,13 @@ const planetObjects: Record<
   }
 > = {};
 
+let lastTimestamp: DOMHighResTimeStamp = 0;
+let lastAnimationFrame: number | undefined;
+
 const Visualizer = ({ user }: Props) => {
   const { planets } = usePlanets();
   const { userInfo } = useUserData(user);
+
   const ref = useRef<HTMLDivElement>(null);
 
   const [currentPlanetId, setCurrentPlanetId] = useState<number>();
@@ -220,46 +224,73 @@ const Visualizer = ({ user }: Props) => {
 
         camera.lookAt(x, y, z);
       }
+    }
 
-      const animate = () => {
-        requestAnimationFrame(animate);
+    const animate = (timestamp: DOMHighResTimeStamp) => {
+      lastAnimationFrame = requestAnimationFrame(animate);
+      if (rocketObj && userInfo) {
+        const deltaT = (timestamp - lastTimestamp) / 1000 / 60 / 60;
 
-        renderer.render(scene, camera);
+        console.log(userInfo.velocityX);
 
-        Object.values(planetObjects).forEach(
-          ({ whiteSphere, materialSphere, line }) => {
-            if (isNaN(camera.position.x)) return;
-            const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
-            const distance = camera.position.distanceTo(whiteSphere.position);
+        const xDiff = (userInfo.velocityX * deltaT) / factor;
+        const yDiff = (userInfo.velocityY * deltaT) / factor;
+        const zDiff = (userInfo.velocityZ * deltaT) / factor;
+        rocketObj.position.x += xDiff;
+        rocketObj.position.y += yDiff;
+        rocketObj.position.z += zDiff;
 
-            const distanceRadiusFactor = distance / radius / 500;
-            const scaleFactor = Math.max(distance / radius / 500, 1);
-
-            if (distanceRadiusFactor < 1 && materialSphere) {
-              scene.add(materialSphere);
-              whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
-              if (line) {
-                line.material.opacity = Math.pow(distanceRadiusFactor, 3);
-              }
-            } else if (materialSphere) {
-              scene.remove(materialSphere);
-            }
-
-            if (materialSphere) {
-              materialSphere.rotation.y += 0.0002;
-            }
-
-            whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
-          },
+        controls.target.set(
+          rocketObj.position.x,
+          rocketObj.position.y,
+          rocketObj.position.z,
         );
 
-        controls.update();
-        TWEEN.update();
-        composer.render();
-      };
+        camera.position.x += xDiff;
+        camera.position.y += yDiff;
+        camera.position.z += zDiff;
+      }
 
-      animate();
+      renderer.render(scene, camera);
+
+      Object.values(planetObjects).forEach(
+        ({ whiteSphere, materialSphere, line }) => {
+          if (isNaN(camera.position.x)) return;
+          const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
+          const distance = camera.position.distanceTo(whiteSphere.position);
+
+          const distanceRadiusFactor = distance / radius / 500;
+          const scaleFactor = Math.max(distance / radius / 500, 1);
+
+          if (distanceRadiusFactor < 1 && materialSphere) {
+            scene.add(materialSphere);
+            whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
+            if (line) {
+              line.material.opacity = Math.pow(distanceRadiusFactor, 3);
+            }
+          } else if (materialSphere) {
+            scene.remove(materialSphere);
+          }
+
+          if (materialSphere) {
+            materialSphere.rotation.y += 0.0002;
+          }
+
+          whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        },
+      );
+
+      controls.update();
+      TWEEN.update();
+      composer.render();
+      lastTimestamp = timestamp;
+    };
+
+    if (lastAnimationFrame) {
+      window.cancelAnimationFrame(lastAnimationFrame);
     }
+
+    animate(lastTimestamp);
   }, [intervals, planets, startCircles, userInfo]);
 
   useEffect(() => {
@@ -290,9 +321,6 @@ const Visualizer = ({ user }: Props) => {
       });
 
       controls.target.set(x, y, z);
-
-      const scale = 0.001;
-      obj.scale.set(scale, scale, scale);
     }
   }, [
     userInfo,
@@ -408,7 +436,7 @@ const Visualizer = ({ user }: Props) => {
               }
             });
 
-            const scale = 0.001;
+            const scale = 0.0005;
             obj.scale.set(scale, scale, scale);
           });
         }
