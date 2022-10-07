@@ -82,8 +82,6 @@ controls.autoRotateSpeed = 0.1;
 
 const factor = 1000000;
 
-let sky: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>;
-
 interface Props {
   user: User;
 }
@@ -91,11 +89,15 @@ interface Props {
 const sqr = (num: number) => Math.pow(num, 2);
 
 type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
-const spheres: Array<{
-  whiteSphere: Sphere;
-  materialSphere?: Sphere;
-  line?: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
-}> = [];
+
+const planetObjects: Record<
+  string,
+  {
+    whiteSphere: Sphere;
+    materialSphere?: Sphere;
+    line?: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
+  }
+> = {};
 
 const objects: THREE.Group[] = [];
 
@@ -195,30 +197,32 @@ const Visualizer = ({ user }: Props) => {
 
         renderer.render(scene, camera);
 
-        spheres.forEach(({ whiteSphere, materialSphere, line }) => {
-          if (isNaN(camera.position.x)) return;
-          const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
-          const distance = camera.position.distanceTo(whiteSphere.position);
+        Object.values(planetObjects).forEach(
+          ({ whiteSphere, materialSphere, line }) => {
+            if (isNaN(camera.position.x)) return;
+            const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
+            const distance = camera.position.distanceTo(whiteSphere.position);
 
-          const distanceRadiusFactor = distance / radius / 500;
-          const scaleFactor = Math.max(distance / radius / 500, 1);
+            const distanceRadiusFactor = distance / radius / 500;
+            const scaleFactor = Math.max(distance / radius / 500, 1);
 
-          if (distanceRadiusFactor < 1 && materialSphere) {
-            scene.add(materialSphere);
-            whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
-            if (line) {
-              line.material.opacity = Math.pow(distanceRadiusFactor, 3);
+            if (distanceRadiusFactor < 1 && materialSphere) {
+              scene.add(materialSphere);
+              whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
+              if (line) {
+                line.material.opacity = Math.pow(distanceRadiusFactor, 3);
+              }
+            } else if (materialSphere) {
+              scene.remove(materialSphere);
             }
-          } else if (materialSphere) {
-            scene.remove(materialSphere);
-          }
 
-          if (materialSphere) {
-            materialSphere.rotation.y += 0.0002;
-          }
+            if (materialSphere) {
+              materialSphere.rotation.y += 0.0002;
+            }
 
-          whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        });
+            whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+          },
+        );
 
         controls.update();
         TWEEN.update();
@@ -240,9 +244,10 @@ const Visualizer = ({ user }: Props) => {
       const skyGeo = new THREE.SphereGeometry(1000000, 25, 25);
       const skyTexture = new THREE.TextureLoader().load('models/space.jpg');
       const spaceMaterial = new THREE.MeshBasicMaterial({ map: skyTexture });
-      sky = new THREE.Mesh(skyGeo, spaceMaterial);
+      const sky = new THREE.Mesh(skyGeo, spaceMaterial);
       sky.material.side = THREE.DoubleSide;
       scene.add(sky);
+
       const x = userInfo?.positionX / factor;
       const y = userInfo?.positionY / factor;
       const z = userInfo?.positionZ / factor;
@@ -365,7 +370,7 @@ const Visualizer = ({ user }: Props) => {
           whiteSphere.position.z = z;
           scene.add(whiteSphere);
 
-          spheres.push({ materialSphere, whiteSphere });
+          planetObjects[planet.name] = { materialSphere, whiteSphere };
           outlinePass.selectedObjects.push(materialSphere);
         } else {
           const geometry = new THREE.SphereGeometry(radius, 32, 16);
@@ -379,12 +384,10 @@ const Visualizer = ({ user }: Props) => {
           whiteSphere.position.y = y;
           whiteSphere.position.z = z;
 
-          spheres.push({ whiteSphere });
+          planetObjects[planet.name] = { whiteSphere };
         }
 
         if (planet.orbiting) {
-          const last = spheres[spheres.length - 1];
-
           const orbiting = planet.orbiting;
           const orbX = (orbiting?.positionX ?? 0) / factor;
           const orbY = (orbiting?.positionY ?? 0) / factor;
@@ -424,7 +427,7 @@ const Visualizer = ({ user }: Props) => {
           l.material.transparent = true;
           l.material.blending = AdditiveBlending;
           scene.add(l);
-          last.line = l;
+          planetObjects[planet.name].line = l;
         }
       }
     }
