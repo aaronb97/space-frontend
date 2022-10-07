@@ -1,10 +1,12 @@
 import {
+  createUserWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInAnonymously,
+  signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { auth } from '../firebase/firebaseApp';
@@ -15,6 +17,11 @@ const google = new GoogleAuthProvider();
 export function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  const [emailClicked, setEmailClicked] = useState(false);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -39,9 +46,46 @@ export function Login() {
     signInAnonymously(auth).catch(logError);
   };
 
+  const onClickEmailSignUp = () => {
+    createUserWithEmailAndPassword(auth, email, password).catch((e) =>
+      console.error(e),
+    );
+  };
+
+  const onClickEmailSignIn = () => {
+    signInWithEmailAndPassword(auth, email, password).catch((e) =>
+      console.error(e),
+    );
+  };
+
+  const onClickEmail = () => {
+    setEmailClicked(true);
+  };
+
+  if (emailClicked) {
+    return (
+      <Container>
+        <input
+          placeholder="E-mail"
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+        />
+        <input
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+        />
+        <button onClick={onClickEmailSignIn}>Sign In</button>
+        <button onClick={onClickEmailSignUp}>Sign Up</button>
+        <button onClick={() => setEmailClicked(false)}>Back</button>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <button onClick={onClickGoogle}>Sign in with Google</button>
+      <button onClick={onClickEmail}>Sign in with E-mail</button>
       <button onClick={onClickGuest}>Continue as Guest</button>
     </Container>
   );
