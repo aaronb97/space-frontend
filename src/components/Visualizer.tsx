@@ -11,7 +11,7 @@ import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import { User } from 'firebase/auth';
-import { Vector3 } from 'three';
+import { Mesh, Vector3 } from 'three';
 import { calculateDist } from '../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../types/UserData';
@@ -243,10 +243,16 @@ const Visualizer = ({ user }: Props) => {
           obj.position.x = x;
           obj.position.y = y;
           obj.position.z = z;
+          obj.traverse((x) => {
+            if (x instanceof Mesh) {
+              x.material.color.set(userInfo.color);
+            }
+          });
+
           const scale = 0.001;
           obj.scale.set(scale, scale, scale);
 
-          const light = new THREE.PointLight(0xffffff, 0.6);
+          const light = new THREE.PointLight(0xffffff, 0.5);
           light.position.set(0, 0, 0);
           scene.add(light);
         });
