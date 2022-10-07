@@ -211,6 +211,10 @@ const Visualizer = ({ user }: Props) => {
             scene.remove(materialSphere);
           }
 
+          if (materialSphere) {
+            materialSphere.rotation.y += 0.0002;
+          }
+
           whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
         });
 
@@ -243,20 +247,30 @@ const Visualizer = ({ user }: Props) => {
           obj.position.x = x;
           obj.position.y = y;
           obj.position.z = z;
-          obj.traverse((x) => {
-            if (x instanceof Mesh) {
-              x.material.color.set(userInfo.color);
+
+          obj.traverse((subObj) => {
+            if (subObj instanceof Mesh) {
+              subObj.material.color.set(userInfo.color);
+              subObj.lookAt(
+                new Vector3(
+                  userInfo.planet.positionX / factor,
+                  userInfo.planet.positionY / factor,
+                  userInfo.planet.positionZ / factor,
+                ),
+              );
+
+              subObj.rotateX(1.5708);
             }
           });
 
           const scale = 0.001;
           obj.scale.set(scale, scale, scale);
-
-          const light = new THREE.PointLight(0xffffff, 0.5);
-          light.position.set(0, 0, 0);
-          scene.add(light);
         });
       }
+
+      const light = new THREE.PointLight(0xffffff, 1);
+      light.position.set(0, 0, 0);
+      scene.add(light);
 
       controls.target.set(x, y, z);
 
