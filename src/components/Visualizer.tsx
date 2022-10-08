@@ -20,7 +20,7 @@ import { Planet } from '../types/Planet';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
-  75,
+  50,
   window.innerWidth / window.innerHeight,
   0.0001,
   50000,
@@ -380,7 +380,7 @@ const Visualizer = ({ user }: Props) => {
   useEffect(() => {
     if (planets?.length && userInfo) {
       if (!sky) {
-        const skyGeo = new THREE.SphereGeometry(1000000, 25, 25);
+        const skyGeo = new THREE.SphereGeometry(2000000, 25, 25);
         const skyTexture = new THREE.TextureLoader().load('models/space.jpg');
         const spaceMaterial = new THREE.MeshBasicMaterial({ map: skyTexture });
         sky = new THREE.Mesh(skyGeo, spaceMaterial);
