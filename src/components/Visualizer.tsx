@@ -284,6 +284,10 @@ const Visualizer = ({ user }: Props) => {
           outlinePass.selectedObjects.push(materialSphere);
         }
 
+        if (distanceRadiusFactor > 1) {
+          whiteSphere.material.opacity = 1;
+        }
+
         if (distanceRadiusFactor < 1 && materialSphere) {
           scene.add(materialSphere);
           whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
@@ -482,6 +486,7 @@ const Visualizer = ({ user }: Props) => {
 
           const whiteSphere = new THREE.Mesh(geometry, material);
           whiteSphere.material.transparent = true;
+          whiteSphere.material.opacity = 0;
           scene.add(whiteSphere);
 
           whiteSphere.position.x = x;
