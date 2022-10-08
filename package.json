@@ -8,18 +8,18 @@
     "@testing-library/user-event": "^13.5.0",
     "@tweenjs/tween.js": "^18.6.4",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.11.59",
-    "@types/react": "^18.0.20",
+    "@types/node": "^16.11.64",
+    "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
-    "axios": "^0.27.2",
-    "firebase": "^9.10.0",
+    "axios": "^1.1.2",
+    "firebase": "^9.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-query": "^3.39.2",
-    "react-router-dom": "^6.4.0",
+    "react-router-dom": "^6.4.2",
     "react-scripts": "5.0.1",
     "react-select": "^5.4.0",
-    "styled-components": "^5.3.5",
+    "styled-components": "^5.3.6",
     "three": "^0.145.0",
     "three-spritetext": "^1.6.5",
     "web-vitals": "^2.1.4"
@@ -51,14 +51,14 @@
   "devDependencies": {
     "@types/styled-components": "^5.1.26",
     "@types/three": "^0.144.0",
-    "@typescript-eslint/eslint-plugin": "^5.38.0",
-    "eslint": "^8.23.1",
+    "@typescript-eslint/eslint-plugin": "^5.39.0",
+    "eslint": "^8.25.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard-with-typescript": "^23.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-n": "^15.2.5",
+    "eslint-plugin-n": "^15.3.0",
     "eslint-plugin-promise": "^6.0.1",
     "eslint-plugin-react": "^7.31.8",
-    "typescript": "^4.8.3"
+    "typescript": "^4.8.4"
   }
 }
