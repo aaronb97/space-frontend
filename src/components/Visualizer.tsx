@@ -166,7 +166,7 @@ const Visualizer = ({ user }: Props) => {
         setTimeout(() => {
           scene.remove(l);
         }, 1000);
-      }, 1000);
+      }, 1000 + Math.random() * 100);
 
       intervals.push(interval);
     },
