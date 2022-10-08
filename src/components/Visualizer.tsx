@@ -15,19 +15,8 @@ import { AdditiveBlending, Mesh, Vector3 } from 'three';
 import { calculateDist } from '../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../types/UserData';
-
-const modelNames: Record<string, string> = {
-  'The Sun': 'models/sun.jpg',
-  Mercury: 'models/mercury.jpg',
-  Venus: 'models/venus.jpg',
-  Earth: 'models/earth.jpg',
-  Jupiter: 'models/jupiter.jpg',
-  Mars: 'models/mars.jpg',
-  'The Moon': 'models/moon.jpg',
-  Saturn: 'models/saturn.jpg',
-  Uranus: 'models/uranus.jpg',
-  Neptune: 'models/neptune.jpg',
-};
+import { getModelName } from '../utils/getModelName';
+import { Planet } from '../types/Planet';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -104,6 +93,8 @@ const planetObjects: Record<
     whiteSphere: Sphere;
     materialSphere?: Sphere;
     line?: THREE.Line<THREE.BufferGeometry, THREE.LineBasicMaterial>;
+    textureLoaded?: boolean;
+    planet: Planet;
   }
 > = {};
 
@@ -260,32 +251,56 @@ const Visualizer = ({ user }: Props) => {
 
       renderer.render(scene, camera);
 
-      Object.values(planetObjects).forEach(
-        ({ whiteSphere, materialSphere, line }) => {
-          if (isNaN(camera.position.x)) return;
-          const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
-          const distance = camera.position.distanceTo(whiteSphere.position);
+      Object.keys(planetObjects).forEach((key) => {
+        const { materialSphere, whiteSphere, line, textureLoaded, planet } =
+          planetObjects[key];
 
-          const distanceRadiusFactor = distance / radius / 500;
-          const scaleFactor = Math.max(distance / radius / 500, 1);
+        if (isNaN(camera.position.x)) return;
+        const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
+        const distance = camera.position.distanceTo(whiteSphere.position);
 
-          if (distanceRadiusFactor < 1 && materialSphere) {
-            scene.add(materialSphere);
-            whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
-            if (line) {
-              line.material.opacity = Math.pow(distanceRadiusFactor, 3);
-            }
-          } else if (materialSphere) {
-            scene.remove(materialSphere);
-          }
+        const distanceRadiusFactor = distance / radius / 500;
+        const scaleFactor = Math.max(distance / radius / 500, 1);
 
-          if (materialSphere) {
-            materialSphere.rotation.y += 0.0002;
-          }
+        if (distanceRadiusFactor < 2 && !textureLoaded) {
+          planetObjects[key].textureLoaded = true;
+          const geometry = new THREE.SphereGeometry(radius, 32, 16);
 
-          whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        },
-      );
+          const MaterialType =
+            planet.type !== 'star'
+              ? THREE.MeshStandardMaterial
+              : THREE.MeshBasicMaterial;
+
+          const material = new MaterialType({
+            map: new THREE.TextureLoader().load(getModelName(planet)),
+          });
+
+          const materialSphere = new THREE.Mesh(geometry, material);
+          materialSphere.position.x = whiteSphere.position.x;
+          materialSphere.position.y = whiteSphere.position.y;
+          materialSphere.position.z = whiteSphere.position.z;
+
+          planetObjects[planet.name].materialSphere = materialSphere;
+          outlinePass.selectedObjects.push(materialSphere);
+        }
+
+        if (distanceRadiusFactor < 1 && materialSphere) {
+          scene.add(materialSphere);
+          whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
+        } else if (materialSphere) {
+          scene.remove(materialSphere);
+        }
+
+        if (line) {
+          line.material.opacity = Math.pow(distanceRadiusFactor, 3);
+        }
+
+        if (materialSphere) {
+          materialSphere.rotation.y += 0.0002;
+        }
+
+        whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      });
 
       controls.update();
       TWEEN.update();
@@ -462,51 +477,18 @@ const Visualizer = ({ user }: Props) => {
           const z = planet.positionZ / factor;
           const radius = planet.radius ? planet.radius / factor : 0.005;
 
-          if (modelNames[planet.name]) {
-            const modelName = modelNames[planet.name];
-            const geometry = new THREE.SphereGeometry(radius, 32, 16);
+          const geometry = new THREE.SphereGeometry(radius, 32, 16);
+          const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-            const MaterialType =
-              planet.name !== 'The Sun'
-                ? THREE.MeshStandardMaterial
-                : THREE.MeshBasicMaterial;
+          const whiteSphere = new THREE.Mesh(geometry, material);
+          whiteSphere.material.transparent = true;
+          scene.add(whiteSphere);
 
-            const material = new MaterialType({
-              map: new THREE.TextureLoader().load(modelName),
-            });
+          whiteSphere.position.x = x;
+          whiteSphere.position.y = y;
+          whiteSphere.position.z = z;
 
-            const whiteMaterial = new THREE.MeshBasicMaterial({
-              color: 0xffffff,
-              transparent: true,
-            });
-
-            const whiteSphere = new THREE.Mesh(geometry, whiteMaterial);
-
-            const materialSphere = new THREE.Mesh(geometry, material);
-            materialSphere.position.x = x;
-            materialSphere.position.y = y;
-            materialSphere.position.z = z;
-            whiteSphere.position.x = x;
-            whiteSphere.position.y = y;
-            whiteSphere.position.z = z;
-            scene.add(whiteSphere);
-
-            planetObjects[planet.name] = { materialSphere, whiteSphere };
-            outlinePass.selectedObjects.push(materialSphere);
-          } else {
-            const geometry = new THREE.SphereGeometry(radius, 32, 16);
-            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-            const whiteSphere = new THREE.Mesh(geometry, material);
-            whiteSphere.material.transparent = true;
-            scene.add(whiteSphere);
-
-            whiteSphere.position.x = x;
-            whiteSphere.position.y = y;
-            whiteSphere.position.z = z;
-
-            planetObjects[planet.name] = { whiteSphere };
-          }
+          planetObjects[planet.name] = { whiteSphere, planet };
 
           if (planet.orbiting) {
             const orbiting = planet.orbiting;

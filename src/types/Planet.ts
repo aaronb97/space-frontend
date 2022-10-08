@@ -5,6 +5,7 @@ export interface Planet {
   positionY: number;
   positionZ: number;
   radius: number;
+  type: string;
 
   orbiting?: Planet;
 }
