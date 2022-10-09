@@ -92,12 +92,15 @@ export function Game({ user }: Props) {
     if (userInfo && join) {
       client
         .joinGroup(join)
-        .then((group) => {
+        .then((user) => {
           void queryClient.invalidateQueries(['userInfo']);
-          const name = group?.data.name;
+          const name = user?.data.groups.find(
+            (group) => group.uuid === join,
+          )?.name;
+
           if (name) {
             setTimeout(() => {
-              setGroupNotification(`Successfully joined '${group?.data.name}'`);
+              setGroupNotification(`Successfully joined '${name}'`);
             }, 1000);
           }
         })
