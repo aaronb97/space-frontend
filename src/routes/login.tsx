@@ -95,7 +95,7 @@ export function Login() {
   return (
     <Container>
       <button onClick={onClickGoogle}>Sign in with Google</button>
-      <button onClick={onClickEmail}>Sign in with E-mail</button>
+      <button onClick={onClickEmail}>Sign in with Email</button>
       <button onClick={onClickGuest}>Continue as Guest</button>
     </Container>
   );
