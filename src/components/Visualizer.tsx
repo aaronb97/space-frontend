@@ -77,7 +77,7 @@ controls.autoRotateSpeed = 0.1;
 let sky: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | undefined;
 let rocketObj: THREE.Group | undefined;
 
-const factor = 1000000;
+const DISTANCE_FACTOR = 1000000;
 
 interface Props {
   user: User;
@@ -130,9 +130,9 @@ const Visualizer = ({ user }: Props) => {
               positionZ: camera.position.z,
             },
             {
-              positionX: userToCircle.positionX / factor,
-              positionY: userToCircle.positionY / factor,
-              positionZ: userToCircle.positionZ / factor,
+              positionX: userToCircle.positionX / DISTANCE_FACTOR,
+              positionY: userToCircle.positionY / DISTANCE_FACTOR,
+              positionZ: userToCircle.positionZ / DISTANCE_FACTOR,
             },
           ) / 750;
 
@@ -145,8 +145,8 @@ const Visualizer = ({ user }: Props) => {
             const newg = new THREE.BufferGeometry().setFromPoints(
               new THREE.Path()
                 .absarc(
-                  userToCircle?.positionX / factor,
-                  userToCircle?.positionY / factor,
+                  userToCircle?.positionX / DISTANCE_FACTOR,
+                  userToCircle?.positionY / DISTANCE_FACTOR,
                   r * dist,
                   0,
                   Math.PI * 2,
@@ -156,7 +156,7 @@ const Visualizer = ({ user }: Props) => {
             );
 
             l.geometry = newg;
-            l.position.z = userToCircle.positionZ / factor;
+            l.position.z = userToCircle.positionZ / DISTANCE_FACTOR;
             l.material.opacity = dist > 0.001 ? 10 - r : 0;
           })
           .easing(TWEEN.Easing.Quadratic.Out)
@@ -212,9 +212,9 @@ const Visualizer = ({ user }: Props) => {
           zRand * normal,
         ];
 
-        const x = userInfo.positionX / factor;
-        const y = userInfo.positionY / factor;
-        const z = userInfo.positionZ / factor;
+        const x = userInfo.positionX / DISTANCE_FACTOR;
+        const y = userInfo.positionY / DISTANCE_FACTOR;
+        const z = userInfo.positionZ / DISTANCE_FACTOR;
 
         camera.position.set(
           x + distance * xNorm,
@@ -231,9 +231,9 @@ const Visualizer = ({ user }: Props) => {
       if (rocketObj && userInfo) {
         const deltaT = (timestamp - lastTimestamp) / 1000 / 60 / 60;
 
-        const xDiff = (userInfo.velocityX * deltaT) / factor;
-        const yDiff = (userInfo.velocityY * deltaT) / factor;
-        const zDiff = (userInfo.velocityZ * deltaT) / factor;
+        const xDiff = (userInfo.velocityX * deltaT) / DISTANCE_FACTOR;
+        const yDiff = (userInfo.velocityY * deltaT) / DISTANCE_FACTOR;
+        const zDiff = (userInfo.velocityZ * deltaT) / DISTANCE_FACTOR;
         rocketObj.position.x += xDiff;
         rocketObj.position.y += yDiff;
         rocketObj.position.z += zDiff;
@@ -323,9 +323,9 @@ const Visualizer = ({ user }: Props) => {
     const obj = rocketObj;
 
     if (userInfo && obj) {
-      const x = userInfo?.positionX / factor;
-      const y = userInfo?.positionY / factor;
-      const z = userInfo?.positionZ / factor;
+      const x = userInfo?.positionX / DISTANCE_FACTOR;
+      const y = userInfo?.positionY / DISTANCE_FACTOR;
+      const z = userInfo?.positionZ / DISTANCE_FACTOR;
 
       obj.position.x = x;
       obj.position.y = y;
@@ -336,9 +336,9 @@ const Visualizer = ({ user }: Props) => {
           subObj.material.color.set(userInfo.color);
           subObj.lookAt(
             new Vector3(
-              userInfo.planet.positionX / factor,
-              userInfo.planet.positionY / factor,
-              userInfo.planet.positionZ / factor,
+              userInfo.planet.positionX / DISTANCE_FACTOR,
+              userInfo.planet.positionY / DISTANCE_FACTOR,
+              userInfo.planet.positionZ / DISTANCE_FACTOR,
             ),
           );
 
@@ -388,9 +388,9 @@ const Visualizer = ({ user }: Props) => {
         scene.add(sky);
       }
 
-      const x = userInfo?.positionX / factor;
-      const y = userInfo?.positionY / factor;
-      const z = userInfo?.positionZ / factor;
+      const x = userInfo?.positionX / DISTANCE_FACTOR;
+      const y = userInfo?.positionY / DISTANCE_FACTOR;
+      const z = userInfo?.positionZ / DISTANCE_FACTOR;
 
       sky.position.x = x;
       sky.position.y = y;
@@ -423,9 +423,9 @@ const Visualizer = ({ user }: Props) => {
 
         new TWEEN.Tween(coords)
           .to({
-            x: userInfo.positionX / factor + distance * xNorm,
-            y: userInfo.positionY / factor + distance * yNorm,
-            z: userInfo.positionZ / factor + distance * zNorm,
+            x: userInfo.positionX / DISTANCE_FACTOR + distance * xNorm,
+            y: userInfo.positionY / DISTANCE_FACTOR + distance * yNorm,
+            z: userInfo.positionZ / DISTANCE_FACTOR + distance * zNorm,
           })
           .onUpdate((newCoords) => {
             camera.position.set(newCoords.x, newCoords.y, newCoords.z);
@@ -452,9 +452,9 @@ const Visualizer = ({ user }: Props) => {
                 subObj.material.color.set(userInfo.color);
                 subObj.lookAt(
                   new Vector3(
-                    userInfo.planet.positionX / factor,
-                    userInfo.planet.positionY / factor,
-                    userInfo.planet.positionZ / factor,
+                    userInfo.planet.positionX / DISTANCE_FACTOR,
+                    userInfo.planet.positionY / DISTANCE_FACTOR,
+                    userInfo.planet.positionZ / DISTANCE_FACTOR,
                   ),
                 );
 
@@ -476,10 +476,12 @@ const Visualizer = ({ user }: Props) => {
         scene.add(new THREE.AmbientLight(0x101010));
 
         for (const planet of planets) {
-          const x = planet.positionX / factor;
-          const y = planet.positionY / factor;
-          const z = planet.positionZ / factor;
-          const radius = planet.radius ? planet.radius / factor : 0.005;
+          const x = planet.positionX / DISTANCE_FACTOR;
+          const y = planet.positionY / DISTANCE_FACTOR;
+          const z = planet.positionZ / DISTANCE_FACTOR;
+          const radius = planet.radius
+            ? planet.radius / DISTANCE_FACTOR
+            : 0.005;
 
           const geometry = new THREE.SphereGeometry(radius, 32, 16);
           const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -497,9 +499,9 @@ const Visualizer = ({ user }: Props) => {
 
           if (planet.orbiting) {
             const orbiting = planet.orbiting;
-            const orbX = (orbiting?.positionX ?? 0) / factor;
-            const orbY = (orbiting?.positionY ?? 0) / factor;
-            const orbZ = (orbiting?.positionZ ?? 0) / factor;
+            const orbX = (orbiting?.positionX ?? 0) / DISTANCE_FACTOR;
+            const orbY = (orbiting?.positionY ?? 0) / DISTANCE_FACTOR;
+            const orbZ = (orbiting?.positionZ ?? 0) / DISTANCE_FACTOR;
             const orbitRadius = Math.sqrt(
               sqr(x - orbX) + sqr(y - orbY) + sqr(z - orbZ),
             );
@@ -507,8 +509,12 @@ const Visualizer = ({ user }: Props) => {
             const g = new THREE.BufferGeometry().setFromPoints(
               new THREE.Path()
                 .absarc(
-                  planet.orbiting ? planet.orbiting.positionX / factor : 0,
-                  planet.orbiting ? planet.orbiting.positionY / factor : 0,
+                  planet.orbiting
+                    ? planet.orbiting.positionX / DISTANCE_FACTOR
+                    : 0,
+                  planet.orbiting
+                    ? planet.orbiting.positionY / DISTANCE_FACTOR
+                    : 0,
                   orbitRadius,
                   0,
                   Math.PI * 2,
@@ -519,7 +525,7 @@ const Visualizer = ({ user }: Props) => {
 
             const m = new THREE.LineBasicMaterial({ color: 0x666666 });
             const l = new THREE.Line(g, m);
-            l.position.z = (orbiting?.positionZ ?? 0) / factor;
+            l.position.z = (orbiting?.positionZ ?? 0) / DISTANCE_FACTOR;
 
             l.rotateY(
               // this is bogus
