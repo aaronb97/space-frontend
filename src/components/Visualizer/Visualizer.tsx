@@ -11,7 +11,7 @@ import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 import { usePlanets } from '../../hooks/usePlanets';
 import { useUserData } from '../../hooks/useUserData';
 import { User } from 'firebase/auth';
-import { Mesh, Vector3 } from 'three';
+import { Mesh } from 'three';
 import { calculateDist } from '../../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../../types/UserData';
@@ -22,6 +22,8 @@ import { getRandomCameraPosition } from './getRandomCameraPosition';
 import { createCircleGeometry } from './createCirclePath';
 import { createOrbitLine } from './createOrbitLine';
 import { getScaledPosition } from './getScaledPosition';
+import { makeObjLookAt } from './makeObjLookAt';
+import { setObjColor } from './setObjColor';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -193,9 +195,7 @@ const Visualizer = ({ user }: Props) => {
       if (userInfo) {
         const [xRand, yRand, zRand] = getRandomCameraPosition(userInfo);
 
-        const x = userInfo.positionX / DISTANCE_FACTOR;
-        const y = userInfo.positionY / DISTANCE_FACTOR;
-        const z = userInfo.positionZ / DISTANCE_FACTOR;
+        const [x, y, z] = getScaledPosition(userInfo);
 
         camera.position.set(x + xRand, y + yRand, z + zRand);
 
@@ -300,28 +300,13 @@ const Visualizer = ({ user }: Props) => {
     const obj = rocketObj;
 
     if (userInfo && obj) {
-      const x = userInfo?.positionX / DISTANCE_FACTOR;
-      const y = userInfo?.positionY / DISTANCE_FACTOR;
-      const z = userInfo?.positionZ / DISTANCE_FACTOR;
+      const [x, y, z] = getScaledPosition(userInfo);
 
       obj.position.x = x;
       obj.position.y = y;
       obj.position.z = z;
 
-      obj.traverse((subObj) => {
-        if (subObj instanceof Mesh) {
-          subObj.material.color.set(userInfo.color);
-          subObj.lookAt(
-            new Vector3(
-              userInfo.planet.positionX / DISTANCE_FACTOR,
-              userInfo.planet.positionY / DISTANCE_FACTOR,
-              userInfo.planet.positionZ / DISTANCE_FACTOR,
-            ),
-          );
-
-          subObj.rotateX(1.5708);
-        }
-      });
+      makeObjLookAt(obj, userInfo.planet);
 
       controls.target.set(x, y, z);
     }
@@ -365,28 +350,18 @@ const Visualizer = ({ user }: Props) => {
         scene.add(sky);
       }
 
-      const x = userInfo?.positionX / DISTANCE_FACTOR;
-      const y = userInfo?.positionY / DISTANCE_FACTOR;
-      const z = userInfo?.positionZ / DISTANCE_FACTOR;
+      const [x, y, z] = getScaledPosition(userInfo);
 
-      sky.position.x = x;
-      sky.position.y = y;
-      sky.position.z = z;
+      sky.position.set(x, y, z);
 
       if (currentPlanetId && currentPlanetId !== userInfo.planet.id) {
-        const coords = {
-          x: camera.position.x,
-          y: camera.position.y,
-          z: camera.position.z,
-        };
-
         const [xRand, yRand, zRand] = getRandomCameraPosition(userInfo);
 
-        new TWEEN.Tween(coords)
+        new TWEEN.Tween(camera.position)
           .to({
-            x: userInfo.positionX / DISTANCE_FACTOR + xRand,
-            y: userInfo.positionY / DISTANCE_FACTOR + yRand,
-            z: userInfo.positionZ / DISTANCE_FACTOR + zRand,
+            x: x + xRand,
+            y: y + yRand,
+            z: z + zRand,
           })
           .onUpdate((newCoords) => {
             camera.position.set(newCoords.x, newCoords.y, newCoords.z);
@@ -403,25 +378,10 @@ const Visualizer = ({ user }: Props) => {
           loader.load('Rocket.obj', (obj) => {
             rocketObj = obj;
             scene.add(obj);
-            obj.position.x = x;
-            obj.position.y = y;
-            obj.position.z = z;
+            obj.position.set(x, y, z);
 
-            obj.traverse((subObj) => {
-              if (subObj instanceof Mesh) {
-                subObj.material.transparent = true;
-                subObj.material.color.set(userInfo.color);
-                subObj.lookAt(
-                  new Vector3(
-                    userInfo.planet.positionX / DISTANCE_FACTOR,
-                    userInfo.planet.positionY / DISTANCE_FACTOR,
-                    userInfo.planet.positionZ / DISTANCE_FACTOR,
-                  ),
-                );
-
-                subObj.rotateX(Math.PI / 2);
-              }
-            });
+            makeObjLookAt(obj, userInfo.planet);
+            setObjColor(obj, userInfo.color);
 
             const scale = 0.0005;
             obj.scale.set(scale, scale, scale);
@@ -437,9 +397,8 @@ const Visualizer = ({ user }: Props) => {
         scene.add(new THREE.AmbientLight(0x101010));
 
         for (const planet of planets) {
-          const x = planet.positionX / DISTANCE_FACTOR;
-          const y = planet.positionY / DISTANCE_FACTOR;
-          const z = planet.positionZ / DISTANCE_FACTOR;
+          const [x, y, z] = getScaledPosition(planet);
+
           const radius = planet.radius
             ? planet.radius / DISTANCE_FACTOR
             : 0.005;
@@ -452,9 +411,7 @@ const Visualizer = ({ user }: Props) => {
           whiteSphere.material.opacity = 0;
           scene.add(whiteSphere);
 
-          whiteSphere.position.x = x;
-          whiteSphere.position.y = y;
-          whiteSphere.position.z = z;
+          whiteSphere.position.set(x, y, z);
 
           planetObjects[planet.name] = { whiteSphere, planet };
 
