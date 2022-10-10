@@ -13,9 +13,7 @@ import { User } from 'firebase/auth';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../../types/UserData';
 import { Planet } from '../../types/Planet';
-import { DISTANCE_FACTOR } from './constants';
 import { getRandomCameraPosition } from './getRandomCameraPosition';
-import { createOrbitLine } from './createOrbitLine';
 import { getScaledPosition } from './getScaledPosition';
 import { makeObjLookAt } from './makeObjLookAt';
 import { setObjColor } from './setObjColor';
@@ -26,6 +24,7 @@ import { UserStatus } from '../../types/UserStatus';
 import { setObjOpacity } from './setObjOpacity';
 import { processCameraAnimation } from './processCameraAnimation';
 import { circleInterval } from './circleInterval';
+import { createPlanetSpheres } from './createPlanetSpheres';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -265,29 +264,13 @@ const Visualizer = ({ user }: Props) => {
         scene.add(new THREE.AmbientLight(0x101010));
 
         for (const planet of planets) {
-          const [x, y, z] = getScaledPosition(planet);
-
-          const radius = planet.radius
-            ? planet.radius / DISTANCE_FACTOR
-            : 0.005;
-
-          const geometry = new THREE.SphereGeometry(radius, 32, 16);
-          const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-          const whiteSphere = new THREE.Mesh(geometry, material);
-          whiteSphere.material.transparent = true;
-          whiteSphere.material.opacity = 0;
+          const { whiteSphere, line } = createPlanetSpheres(planet);
           scene.add(whiteSphere);
-
-          whiteSphere.position.set(x, y, z);
-
-          planetObjects[planet.name] = { whiteSphere, planet };
-
-          if (planet.orbiting) {
-            const l = createOrbitLine(planet.orbiting, planet);
-            scene.add(l);
-            planetObjects[planet.name].line = l;
+          if (line) {
+            scene.add(line);
           }
+
+          planetObjects[planet.name] = { whiteSphere, planet, line };
         }
       }
     }
