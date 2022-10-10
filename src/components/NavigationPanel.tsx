@@ -40,9 +40,17 @@ interface Props {
 export const NavigationPanel = ({
   userInfo,
   planets,
-  notifications,
+  notifications: initialNotificaitons,
 }: Props) => {
   const [selectedPlanet, setSelectedPlanet] = useState<number | ''>('');
+
+  const [innerNotification, setInnerNotification] = useState<
+    string | undefined
+  >();
+
+  const notifications = initialNotificaitons
+    .concat([innerNotification])
+    .filter(Boolean);
 
   const queryClient = useQueryClient();
   const invalidateUserInfo = async () =>
@@ -97,8 +105,12 @@ export const NavigationPanel = ({
                   onClick={() => {
                     client
                       .speedboost()
-                      .then(async () => {
-                        await invalidateUserInfo();
+                      .then((userInfo) => {
+                        if (userInfo?.data.notification) {
+                          setInnerNotification(userInfo?.data.notification);
+                        }
+
+                        void invalidateUserInfo();
                       })
                       .catch((e) => console.error(e));
                   }}
@@ -141,6 +153,7 @@ export const NavigationPanel = ({
                     .updateTravelingTo(selectedPlanet)
                     .then(async () => {
                       await invalidateUserInfo();
+
                       setSelectedPlanet('');
                     })
                     .catch((e) => console.error(e));
@@ -158,6 +171,7 @@ export const NavigationPanel = ({
                       .teleport(selectedPlanet)
                       .then(async () => {
                         await invalidateUserInfo();
+
                         setSelectedPlanet('');
                       })
                       .catch((e) => console.error(e));
