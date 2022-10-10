@@ -1,0 +1,2 @@
+export const DISTANCE_FACTOR = 1000000;
+export const ORBITING_LINE_COLOR = 0x666666;

@@ -10,7 +10,7 @@ import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import styled from 'styled-components';
 import { logError } from '../utils/logError';
-import Visualizer from '../components/Visualizer';
+import Visualizer from '../components/Visualizer/Visualizer';
 import { NavigationPanel } from '../components/NavigationPanel';
 import { ItemsPanel } from '../components/ItemsPanel';
 import { PanelSelector } from '../components/PanelSelector';

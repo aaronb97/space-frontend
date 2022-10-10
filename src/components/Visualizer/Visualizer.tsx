@@ -8,15 +8,20 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
-import { usePlanets } from '../hooks/usePlanets';
-import { useUserData } from '../hooks/useUserData';
+import { usePlanets } from '../../hooks/usePlanets';
+import { useUserData } from '../../hooks/useUserData';
 import { User } from 'firebase/auth';
-import { AdditiveBlending, Mesh, Vector3 } from 'three';
-import { calculateDist } from '../utils/calculateDist';
+import { Mesh, Vector3 } from 'three';
+import { calculateDist } from '../../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
-import { UserData } from '../types/UserData';
-import { getModelName } from '../utils/getModelName';
-import { Planet } from '../types/Planet';
+import { UserData } from '../../types/UserData';
+import { getModelName } from '../../utils/getModelName';
+import { Planet } from '../../types/Planet';
+import { DISTANCE_FACTOR } from './constants';
+import { getRandomCameraPosition } from './getRandomCameraPosition';
+import { createCircleGeometry } from './createCirclePath';
+import { createOrbitLine } from './createOrbitLine';
+import { getScaledPosition } from './getScaledPosition';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -74,17 +79,6 @@ controls.dampingFactor = 0.25;
 controls.autoRotate = true;
 controls.autoRotateSpeed = 0.1;
 
-let sky: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | undefined;
-let rocketObj: THREE.Group | undefined;
-
-const DISTANCE_FACTOR = 1000000;
-
-interface Props {
-  user: User;
-}
-
-const sqr = (num: number) => Math.pow(num, 2);
-
 type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
 
 const planetObjects: Record<
@@ -98,8 +92,14 @@ const planetObjects: Record<
   }
 > = {};
 
+let sky: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | undefined;
+let rocketObj: THREE.Group | undefined;
 let lastTimestamp: DOMHighResTimeStamp = 0;
 let lastAnimationFrame: number | undefined;
+
+interface Props {
+  user: User;
+}
 
 const Visualizer = ({ user }: Props) => {
   const { planets } = usePlanets();
@@ -122,6 +122,9 @@ const Visualizer = ({ user }: Props) => {
         const l = new THREE.Line(new THREE.BufferGeometry(), m);
         scene.add(l);
 
+        const [positionX, positionY, positionZ] =
+          getScaledPosition(userToCircle);
+
         const dist =
           calculateDist(
             {
@@ -130,9 +133,9 @@ const Visualizer = ({ user }: Props) => {
               positionZ: camera.position.z,
             },
             {
-              positionX: userToCircle.positionX / DISTANCE_FACTOR,
-              positionY: userToCircle.positionY / DISTANCE_FACTOR,
-              positionZ: userToCircle.positionZ / DISTANCE_FACTOR,
+              positionX,
+              positionY,
+              positionZ,
             },
           ) / 750;
 
@@ -142,17 +145,11 @@ const Visualizer = ({ user }: Props) => {
           })
           .onUpdate(({ r }) => {
             l.geometry.dispose();
-            const newg = new THREE.BufferGeometry().setFromPoints(
-              new THREE.Path()
-                .absarc(
-                  userToCircle?.positionX / DISTANCE_FACTOR,
-                  userToCircle?.positionY / DISTANCE_FACTOR,
-                  r * dist,
-                  0,
-                  Math.PI * 2,
-                  false,
-                )
-                .getSpacedPoints(100),
+            const newg = createCircleGeometry(
+              userToCircle?.positionX / DISTANCE_FACTOR,
+              userToCircle?.positionY / DISTANCE_FACTOR,
+              r * dist,
+              100,
             );
 
             l.geometry = newg;
@@ -194,33 +191,13 @@ const Visualizer = ({ user }: Props) => {
     if (!ref.current?.contains(renderer.domElement)) {
       ref.current?.appendChild(renderer.domElement);
       if (userInfo) {
-        const distance =
-          userInfo.status === 0
-            ? 0.01
-            : (userInfo.planet.radius || 5000) / 500000;
-
-        const [xRand, yRand, zRand] = [
-          Math.random() - 0.5,
-          Math.random() - 0.5,
-          Math.random() / 2,
-        ];
-
-        const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
-        const [xNorm, yNorm, zNorm] = [
-          xRand * normal,
-          yRand * normal,
-          zRand * normal,
-        ];
+        const [xRand, yRand, zRand] = getRandomCameraPosition(userInfo);
 
         const x = userInfo.positionX / DISTANCE_FACTOR;
         const y = userInfo.positionY / DISTANCE_FACTOR;
         const z = userInfo.positionZ / DISTANCE_FACTOR;
 
-        camera.position.set(
-          x + distance * xNorm,
-          y + distance * yNorm,
-          z + distance * zNorm,
-        );
+        camera.position.set(x + xRand, y + yRand, z + zRand);
 
         camera.lookAt(x, y, z);
       }
@@ -397,35 +374,19 @@ const Visualizer = ({ user }: Props) => {
       sky.position.z = z;
 
       if (currentPlanetId && currentPlanetId !== userInfo.planet.id) {
-        const distance =
-          userInfo.status === 0
-            ? 0.01
-            : (userInfo.planet.radius || 5000) / 500000;
-
-        const [xRand, yRand, zRand] = [
-          Math.random() - 0.5,
-          Math.random() - 0.5,
-          Math.random() / 2,
-        ];
-
-        const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));
-        const [xNorm, yNorm, zNorm] = [
-          xRand * normal,
-          yRand * normal,
-          zRand * normal,
-        ];
-
         const coords = {
           x: camera.position.x,
           y: camera.position.y,
           z: camera.position.z,
         };
 
+        const [xRand, yRand, zRand] = getRandomCameraPosition(userInfo);
+
         new TWEEN.Tween(coords)
           .to({
-            x: userInfo.positionX / DISTANCE_FACTOR + distance * xNorm,
-            y: userInfo.positionY / DISTANCE_FACTOR + distance * yNorm,
-            z: userInfo.positionZ / DISTANCE_FACTOR + distance * zNorm,
+            x: userInfo.positionX / DISTANCE_FACTOR + xRand,
+            y: userInfo.positionY / DISTANCE_FACTOR + yRand,
+            z: userInfo.positionZ / DISTANCE_FACTOR + zRand,
           })
           .onUpdate((newCoords) => {
             camera.position.set(newCoords.x, newCoords.y, newCoords.z);
@@ -458,7 +419,7 @@ const Visualizer = ({ user }: Props) => {
                   ),
                 );
 
-                subObj.rotateX(1.5708);
+                subObj.rotateX(Math.PI / 2);
               }
             });
 
@@ -498,52 +459,7 @@ const Visualizer = ({ user }: Props) => {
           planetObjects[planet.name] = { whiteSphere, planet };
 
           if (planet.orbiting) {
-            const orbiting = planet.orbiting;
-            const orbX = (orbiting?.positionX ?? 0) / DISTANCE_FACTOR;
-            const orbY = (orbiting?.positionY ?? 0) / DISTANCE_FACTOR;
-            const orbZ = (orbiting?.positionZ ?? 0) / DISTANCE_FACTOR;
-            const orbitRadius = Math.sqrt(
-              sqr(x - orbX) + sqr(y - orbY) + sqr(z - orbZ),
-            );
-
-            const g = new THREE.BufferGeometry().setFromPoints(
-              new THREE.Path()
-                .absarc(
-                  planet.orbiting
-                    ? planet.orbiting.positionX / DISTANCE_FACTOR
-                    : 0,
-                  planet.orbiting
-                    ? planet.orbiting.positionY / DISTANCE_FACTOR
-                    : 0,
-                  orbitRadius,
-                  0,
-                  Math.PI * 2,
-                  false,
-                )
-                .getSpacedPoints(10000),
-            );
-
-            const m = new THREE.LineBasicMaterial({ color: 0x666666 });
-            const l = new THREE.Line(g, m);
-            l.position.z = (orbiting?.positionZ ?? 0) / DISTANCE_FACTOR;
-
-            l.rotateY(
-              // this is bogus
-              new Vector3(
-                planet.positionX,
-                planet.positionY,
-                planet.positionZ,
-              ).angleTo(
-                new Vector3(
-                  planet.positionX,
-                  planet.positionY,
-                  planet.positionZ,
-                ),
-              ),
-            );
-
-            l.material.transparent = true;
-            l.material.blending = AdditiveBlending;
+            const l = createOrbitLine(planet.orbiting, planet);
             scene.add(l);
             planetObjects[planet.name].line = l;
           }
