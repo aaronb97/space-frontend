@@ -8,6 +8,7 @@ import { getDateString } from '../utils/getDateString';
 import { Counter } from './Counter';
 import { DestinationPicker } from './DestinationPicker';
 import { Notification } from '../components/Notification';
+import { UserStatus } from '../types/UserStatus';
 
 const Section = styled.div`
   margin-top: 16px;
@@ -58,13 +59,17 @@ export const NavigationPanel = ({
 
   return (
     <>
-      {userInfo.status === 0 && <div>Traveling to {userInfo.planet.name}</div>}
-      {userInfo.status === 1 && <div>Welcome to {userInfo.planet.name}</div>}
+      {userInfo.status === UserStatus.TRAVELING && (
+        <div>Traveling to {userInfo.planet.name}</div>
+      )}
+      {userInfo.status === UserStatus.LANDED && (
+        <div>Welcome to {userInfo.planet.name}</div>
+      )}
       <Section>
         <div>Speed: {userInfo.speed.toLocaleString()} km/hour</div>
       </Section>
       <Section>
-        {userInfo.status === 0 &&
+        {userInfo.status === UserStatus.TRAVELING &&
           !userInfo.speedBoostAvailable &&
           nextBoost < (landingTime ?? Infinity) && (
             <div>

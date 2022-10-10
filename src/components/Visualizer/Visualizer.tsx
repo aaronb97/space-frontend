@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
@@ -15,7 +14,6 @@ import { Mesh } from 'three';
 import { calculateDist } from '../../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../../types/UserData';
-import { getModelName } from '../../utils/getModelName';
 import { Planet } from '../../types/Planet';
 import { DISTANCE_FACTOR } from './constants';
 import { getRandomCameraPosition } from './getRandomCameraPosition';
@@ -24,6 +22,10 @@ import { createOrbitLine } from './createOrbitLine';
 import { getScaledPosition } from './getScaledPosition';
 import { makeObjLookAt } from './makeObjLookAt';
 import { setObjColor } from './setObjColor';
+import { processPlanetObjects } from './processPlanetObjects';
+import { createOutlinePass } from './outlinePass';
+import { createSky } from './createSky';
+import { UserStatus } from '../../types/UserStatus';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -50,11 +52,7 @@ const composer = new EffectComposer(renderer);
 const renderPass = new RenderPass(scene, camera);
 composer.addPass(renderPass);
 
-const outlinePass = new OutlinePass(
-  new THREE.Vector2(window.innerWidth, window.innerHeight),
-  scene,
-  camera,
-);
+const outlinePass = createOutlinePass(scene, camera);
 
 const effectFXAA = new ShaderPass(FXAAShader);
 effectFXAA.uniforms.resolution.value.set(
@@ -63,13 +61,6 @@ effectFXAA.uniforms.resolution.value.set(
 );
 
 composer.addPass(effectFXAA);
-
-outlinePass.edgeStrength = Number(3);
-outlinePass.edgeGlow = Number(0.1);
-outlinePass.edgeThickness = Number(0.1);
-outlinePass.pulsePeriod = Number(0);
-outlinePass.visibleEdgeColor.set('#190a05');
-outlinePass.hiddenEdgeColor.set('#190a05');
 
 composer.addPass(outlinePass);
 
@@ -82,8 +73,7 @@ controls.autoRotate = true;
 controls.autoRotateSpeed = 0.1;
 
 type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
-
-const planetObjects: Record<
+export type PlanetObjects = Record<
   string,
   {
     whiteSphere: Sphere;
@@ -92,7 +82,9 @@ const planetObjects: Record<
     textureLoaded?: boolean;
     planet: Planet;
   }
-> = {};
+>;
+
+const planetObjects: PlanetObjects = {};
 
 let sky: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | undefined;
 let rocketObj: THREE.Group | undefined;
@@ -228,60 +220,7 @@ const Visualizer = ({ user }: Props) => {
 
       renderer.render(scene, camera);
 
-      Object.keys(planetObjects).forEach((key) => {
-        const { materialSphere, whiteSphere, line, textureLoaded, planet } =
-          planetObjects[key];
-
-        if (isNaN(camera.position.x)) return;
-        const radius = whiteSphere.geometry.boundingSphere?.radius ?? 0.1;
-        const distance = camera.position.distanceTo(whiteSphere.position);
-
-        const distanceRadiusFactor = distance / radius / 500;
-        const scaleFactor = Math.max(distance / radius / 500, 1);
-
-        if (distanceRadiusFactor < 2 && !textureLoaded) {
-          planetObjects[key].textureLoaded = true;
-          const geometry = new THREE.SphereGeometry(radius, 32, 16);
-
-          const MaterialType =
-            planet.type !== 'star'
-              ? THREE.MeshStandardMaterial
-              : THREE.MeshBasicMaterial;
-
-          const material = new MaterialType({
-            map: new THREE.TextureLoader().load(getModelName(planet)),
-          });
-
-          const materialSphere = new THREE.Mesh(geometry, material);
-          materialSphere.position.x = whiteSphere.position.x;
-          materialSphere.position.y = whiteSphere.position.y;
-          materialSphere.position.z = whiteSphere.position.z;
-
-          planetObjects[planet.name].materialSphere = materialSphere;
-          outlinePass.selectedObjects.push(materialSphere);
-        }
-
-        if (distanceRadiusFactor > 1) {
-          whiteSphere.material.opacity = 1;
-        }
-
-        if (distanceRadiusFactor < 1 && materialSphere) {
-          scene.add(materialSphere);
-          whiteSphere.material.opacity = Math.pow(distanceRadiusFactor, 3);
-        } else if (materialSphere) {
-          scene.remove(materialSphere);
-        }
-
-        if (line) {
-          line.material.opacity = Math.pow(distanceRadiusFactor, 3);
-        }
-
-        if (materialSphere) {
-          materialSphere.rotation.y += 0.0002;
-        }
-
-        whiteSphere.scale.set(scaleFactor, scaleFactor, scaleFactor);
-      });
+      processPlanetObjects(planetObjects, camera, outlinePass, scene);
 
       controls.update();
       TWEEN.update();
@@ -323,7 +262,7 @@ const Visualizer = ({ user }: Props) => {
 
   useEffect(() => {
     if (rocketObj) {
-      if (userInfo?.status === 0) {
+      if (userInfo?.status === UserStatus.TRAVELING) {
         rocketObj.traverse((obj) => {
           if (obj instanceof Mesh) {
             obj.material.opacity = 1;
@@ -342,11 +281,7 @@ const Visualizer = ({ user }: Props) => {
   useEffect(() => {
     if (planets?.length && userInfo) {
       if (!sky) {
-        const skyGeo = new THREE.SphereGeometry(2000000, 25, 25);
-        const skyTexture = new THREE.TextureLoader().load('models/space.jpg');
-        const spaceMaterial = new THREE.MeshBasicMaterial({ map: skyTexture });
-        sky = new THREE.Mesh(skyGeo, spaceMaterial);
-        sky.material.side = THREE.DoubleSide;
+        sky = createSky();
         scene.add(sky);
       }
 
