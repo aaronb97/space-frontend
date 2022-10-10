@@ -10,14 +10,11 @@ import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 import { usePlanets } from '../../hooks/usePlanets';
 import { useUserData } from '../../hooks/useUserData';
 import { User } from 'firebase/auth';
-import { Mesh } from 'three';
-import { calculateDist } from '../../utils/calculateDist';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../../types/UserData';
 import { Planet } from '../../types/Planet';
 import { DISTANCE_FACTOR } from './constants';
 import { getRandomCameraPosition } from './getRandomCameraPosition';
-import { createCircleGeometry } from './createCirclePath';
 import { createOrbitLine } from './createOrbitLine';
 import { getScaledPosition } from './getScaledPosition';
 import { makeObjLookAt } from './makeObjLookAt';
@@ -26,6 +23,9 @@ import { processPlanetObjects } from './processPlanetObjects';
 import { createOutlinePass } from './outlinePass';
 import { createSky } from './createSky';
 import { UserStatus } from '../../types/UserStatus';
+import { setObjOpacity } from './setObjOpacity';
+import { processCameraAnimation } from './processCameraAnimation';
+import { circleInterval } from './circleInterval';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -108,55 +108,7 @@ const Visualizer = ({ user }: Props) => {
   const startCircles = useCallback(
     (userToCircle: UserData) => {
       const interval = setInterval(() => {
-        const m = new THREE.LineBasicMaterial({
-          color: userToCircle.color,
-          transparent: true,
-        });
-
-        const l = new THREE.Line(new THREE.BufferGeometry(), m);
-        scene.add(l);
-
-        const [positionX, positionY, positionZ] =
-          getScaledPosition(userToCircle);
-
-        const dist =
-          calculateDist(
-            {
-              positionX: camera.position.x,
-              positionY: camera.position.y,
-              positionZ: camera.position.z,
-            },
-            {
-              positionX,
-              positionY,
-              positionZ,
-            },
-          ) / 750;
-
-        new TWEEN.Tween({ r: 1 })
-          .to({
-            r: 10,
-          })
-          .onUpdate(({ r }) => {
-            l.geometry.dispose();
-            const newg = createCircleGeometry(
-              userToCircle?.positionX / DISTANCE_FACTOR,
-              userToCircle?.positionY / DISTANCE_FACTOR,
-              r * dist,
-              100,
-            );
-
-            l.geometry = newg;
-            l.position.z = userToCircle.positionZ / DISTANCE_FACTOR;
-            l.material.opacity = dist > 0.001 ? 10 - r : 0;
-          })
-          .easing(TWEEN.Easing.Quadratic.Out)
-          .duration(1000)
-          .start();
-
-        setTimeout(() => {
-          scene.remove(l);
-        }, 1000);
+        circleInterval(userToCircle, camera, scene);
       }, 1000 + Math.random() * 100);
 
       intervals.push(interval);
@@ -198,24 +150,13 @@ const Visualizer = ({ user }: Props) => {
     const animate = (timestamp: DOMHighResTimeStamp) => {
       lastAnimationFrame = requestAnimationFrame(animate);
       if (rocketObj && userInfo) {
-        const deltaT = (timestamp - lastTimestamp) / 1000 / 60 / 60;
-
-        const xDiff = (userInfo.velocityX * deltaT) / DISTANCE_FACTOR;
-        const yDiff = (userInfo.velocityY * deltaT) / DISTANCE_FACTOR;
-        const zDiff = (userInfo.velocityZ * deltaT) / DISTANCE_FACTOR;
-        rocketObj.position.x += xDiff;
-        rocketObj.position.y += yDiff;
-        rocketObj.position.z += zDiff;
-
-        controls.target.set(
-          rocketObj.position.x,
-          rocketObj.position.y,
-          rocketObj.position.z,
+        processCameraAnimation(
+          timestamp - lastTimestamp,
+          userInfo,
+          camera,
+          controls,
+          rocketObj,
         );
-
-        camera.position.x += xDiff;
-        camera.position.y += yDiff;
-        camera.position.z += zDiff;
       }
 
       renderer.render(scene, camera);
@@ -263,17 +204,9 @@ const Visualizer = ({ user }: Props) => {
   useEffect(() => {
     if (rocketObj) {
       if (userInfo?.status === UserStatus.TRAVELING) {
-        rocketObj.traverse((obj) => {
-          if (obj instanceof Mesh) {
-            obj.material.opacity = 1;
-          }
-        });
+        setObjOpacity(rocketObj, 1);
       } else {
-        rocketObj.traverse((obj) => {
-          if (obj instanceof Mesh) {
-            obj.material.opacity = 0;
-          }
-        });
+        setObjOpacity(rocketObj, 0);
       }
     }
   }, [userInfo?.status]);
