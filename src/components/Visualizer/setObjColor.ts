@@ -9,7 +9,14 @@ export const setObjColor = (obj: THREE.Group, color: string) => {
     if (subObj instanceof Mesh) {
       if (subObj.name.includes('Window')) {
         subObj.material = new MeshBasicMaterial();
-        subObj.material.color.set(0xfff8e3);
+
+        const hours = new Date().getHours();
+
+        if (hours >= 8 && hours < 20) {
+          subObj.material.color.set(0xfff8e3);
+        } else {
+          subObj.material.color.set(0x000000);
+        }
       } else if (subObj.name.includes('Body')) {
         subObj.material = new MeshStandardMaterial();
         subObj.material.color.set(colorObj.hex);
