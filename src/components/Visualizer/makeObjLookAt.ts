@@ -9,8 +9,6 @@ export const makeObjLookAt = (obj: THREE.Group, target: PositionLike) => {
   obj.traverse((subObj) => {
     if (subObj instanceof Mesh) {
       subObj.lookAt(new Vector3(x, y, z));
-
-      subObj.rotateX(Math.PI / 2);
     }
   });
 };
