@@ -46,6 +46,9 @@ function onWindowResize() {
 window.addEventListener('resize', onWindowResize, false);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.physicallyCorrectLights = true;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.shadowMap.enabled = true;
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const composer = new EffectComposer(renderer);
@@ -266,7 +269,8 @@ const Visualizer = ({ user }: Props) => {
           });
         }
 
-        const light = new THREE.PointLight(0xffffff, 1);
+        const light = new THREE.PointLight(0xffffff, 50, 0, 0.5);
+
         light.position.set(0, 0, 0);
         scene.add(light);
 
