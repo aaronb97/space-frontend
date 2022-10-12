@@ -25,6 +25,8 @@ import { setObjOpacity } from './setObjOpacity';
 import { processCameraAnimation } from './processCameraAnimation';
 import { circleInterval } from './circleInterval';
 import { createPlanetSpheres } from './createPlanetSpheres';
+import { Vector3 } from 'three';
+import { DISTANCE_FACTOR } from './constants';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -155,6 +157,15 @@ const Visualizer = ({ user }: Props) => {
           camera,
           controls,
           rocketObj,
+        );
+
+        rocketObj.rotateOnAxis(
+          new Vector3(
+            rocketObj.position.x - userInfo.planet.positionX / DISTANCE_FACTOR,
+            rocketObj.position.y - userInfo.planet.positionY / DISTANCE_FACTOR,
+            rocketObj.position.z - userInfo.planet.positionZ / DISTANCE_FACTOR,
+          ).normalize(),
+          0.01,
         );
       }
 
