@@ -1,12 +1,6 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader';
 import { usePlanets } from '../../hooks/usePlanets';
 import { useUserData } from '../../hooks/useUserData';
 import { User } from 'firebase/auth';
@@ -18,7 +12,6 @@ import { getScaledPosition } from './getScaledPosition';
 import { makeObjLookAt } from './makeObjLookAt';
 import { setObjColor } from './setObjColor';
 import { processPlanetObjects } from './processPlanetObjects';
-import { createOutlinePass } from './outlinePass';
 import { createSky } from './createSky';
 import { UserStatus } from '../../types/UserStatus';
 import { setObjOpacity } from './setObjOpacity';
@@ -27,54 +20,16 @@ import { circleInterval } from './circleInterval';
 import { createPlanetSpheres } from './createPlanetSpheres';
 import { Vector3 } from 'three';
 import { DISTANCE_FACTOR } from './constants';
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  50,
-  window.innerWidth / window.innerHeight,
-  0.0001,
-  50000,
-);
-
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-window.addEventListener('resize', onWindowResize, false);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.physicallyCorrectLights = true;
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.shadowMap.enabled = true;
-renderer.setSize(window.innerWidth, window.innerHeight);
-
-const composer = new EffectComposer(renderer);
-
-const renderPass = new RenderPass(scene, camera);
-composer.addPass(renderPass);
-
-const outlinePass = createOutlinePass(scene, camera);
-
-const effectFXAA = new ShaderPass(FXAAShader);
-effectFXAA.uniforms.resolution.value.set(
-  1 / window.innerWidth,
-  1 / window.innerHeight,
-);
-
-composer.addPass(effectFXAA);
-
-composer.addPass(outlinePass);
-
-const loader = new OBJLoader();
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.25;
-controls.autoRotate = true;
-controls.autoRotateSpeed = 0.1;
+import {
+  camera,
+  composer,
+  controls,
+  loader,
+  outlinePass,
+  renderer,
+  scene,
+  triggerRocketView,
+} from './threeGlobals';
 
 type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
 export type PlanetObjects = Record<
@@ -236,20 +191,7 @@ const Visualizer = ({ user }: Props) => {
       sky.position.set(x, y, z);
 
       if (currentPlanetId && currentPlanetId !== userInfo.planet.id) {
-        const [xRand, yRand, zRand] = getRandomCameraPosition(userInfo);
-
-        new TWEEN.Tween(camera.position)
-          .to({
-            x: x + xRand,
-            y: y + yRand,
-            z: z + zRand,
-          })
-          .onUpdate((newCoords) => {
-            camera.position.set(newCoords.x, newCoords.y, newCoords.z);
-          })
-          .easing(TWEEN.Easing.Quartic.Out)
-          .duration(5000)
-          .start();
+        triggerRocketView(userInfo);
       }
 
       setCurrentPlanetId(userInfo.planet.id);

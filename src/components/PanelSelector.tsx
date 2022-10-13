@@ -1,11 +1,18 @@
 interface Props {
-  selectedPanel: string;
+  selectedPanel: string | undefined;
   setSelectedPanel: React.Dispatch<
-    React.SetStateAction<'items' | 'navigation' | 'groups'>
+    React.SetStateAction<'items' | 'navigation' | 'groups' | undefined>
   >;
+  onTriggerOverheadView: () => void;
+  onTriggerRocketView: () => void;
 }
 
-export const PanelSelector = ({ selectedPanel, setSelectedPanel }: Props) => {
+export const PanelSelector = ({
+  selectedPanel,
+  setSelectedPanel,
+  onTriggerOverheadView,
+  onTriggerRocketView,
+}: Props) => {
   return (
     <div
       style={{
@@ -46,6 +53,28 @@ export const PanelSelector = ({ selectedPanel, setSelectedPanel }: Props) => {
           }}
         >
           Groups
+        </button>
+      </div>
+      <div>
+        <button
+          style={{ width: '100%' }}
+          onClick={() => {
+            setSelectedPanel(undefined);
+            onTriggerOverheadView();
+          }}
+        >
+          Overhead View
+        </button>
+      </div>
+      <div>
+        <button
+          style={{ width: '100%' }}
+          onClick={() => {
+            setSelectedPanel(undefined);
+            onTriggerRocketView();
+          }}
+        >
+          Rocket View
         </button>
       </div>
     </div>

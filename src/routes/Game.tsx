@@ -20,6 +20,10 @@ import { useSearchParams } from 'react-router-dom';
 import { client } from '../client';
 import { useQueryClient } from 'react-query';
 import { ColoredUsername } from '../components/ColoredUsername';
+import {
+  triggerOverheadView,
+  triggerRocketView,
+} from '../components/Visualizer/threeGlobals';
 
 interface Props {
   user: User;
@@ -73,8 +77,20 @@ export function Game({ user }: Props) {
   const queryClient = useQueryClient();
 
   const [selectedPanel, setSelectedPanel] = useState<
-    'items' | 'navigation' | 'groups'
+    'items' | 'navigation' | 'groups' | undefined
   >('navigation');
+
+  const onTriggerOverheadView = () => {
+    if (userInfo) {
+      triggerOverheadView(userInfo);
+    }
+  };
+
+  const onTriggerRocketView = () => {
+    if (userInfo) {
+      triggerRocketView(userInfo);
+    }
+  };
 
   useEffect(() => {
     if (userInfo?.notification) {
@@ -152,20 +168,26 @@ export function Game({ user }: Props) {
           <PanelSelector
             selectedPanel={selectedPanel}
             setSelectedPanel={setSelectedPanel}
+            onTriggerOverheadView={onTriggerOverheadView}
+            onTriggerRocketView={onTriggerRocketView}
           />
         </Header>
         <Center>
-          <Panel>
-            {selectedPanel === 'navigation' && (
-              <NavigationPanel
-                userInfo={userInfo}
-                planets={planets}
-                notifications={notifications.filter(Boolean)}
-              />
-            )}
-            {selectedPanel === 'items' && <ItemsPanel userInfo={userInfo} />}
-            {selectedPanel === 'groups' && <GroupsPanel userInfo={userInfo} />}
-          </Panel>
+          {selectedPanel && (
+            <Panel>
+              {selectedPanel === 'navigation' && (
+                <NavigationPanel
+                  userInfo={userInfo}
+                  planets={planets}
+                  notifications={notifications.filter(Boolean)}
+                />
+              )}
+              {selectedPanel === 'items' && <ItemsPanel userInfo={userInfo} />}
+              {selectedPanel === 'groups' && (
+                <GroupsPanel userInfo={userInfo} />
+              )}
+            </Panel>
+          )}
         </Center>
         <Footer>
           {<SignOutButton />}

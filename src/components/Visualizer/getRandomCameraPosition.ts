@@ -7,7 +7,7 @@ export const getRandomCameraPosition = (
 ): [number, number, number] => {
   const distance =
     user.status === UserStatus.TRAVELING
-      ? 0.01
+      ? 0.005
       : (user.planet.radius || 5000) / 500000;
 
   const [xRand, yRand, zRand] = [
