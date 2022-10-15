@@ -13,17 +13,18 @@ import { logError } from '../utils/logError';
 import Visualizer from '../components/Visualizer/Visualizer';
 import { NavigationPanel } from '../components/NavigationPanel';
 import { ItemsPanel } from '../components/ItemsPanel';
-import { PanelSelector } from '../components/PanelSelector';
 import { Panel } from '../components/Panel';
 import { GroupsPanel } from '../components/GroupsPanel';
 import { useSearchParams } from 'react-router-dom';
 import { client } from '../client';
 import { useQueryClient } from 'react-query';
 import { ColoredUsername } from '../components/ColoredUsername';
-import {
-  triggerOverheadView,
-  triggerRocketView,
-} from '../components/Visualizer/threeGlobals';
+import { PanelSelector } from '../components/PanelSelector';
+import { PanelType } from '../types/Panel';
+// import {
+//   triggerOverheadView,
+//   triggerRocketView,
+// } from '../components/Visualizer/threeGlobals';
 
 interface Props {
   user: User;
@@ -76,21 +77,7 @@ export function Game({ user }: Props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
-  const [selectedPanel, setSelectedPanel] = useState<
-    'items' | 'navigation' | 'groups' | undefined
-  >('navigation');
-
-  const onTriggerOverheadView = () => {
-    if (userInfo) {
-      triggerOverheadView(userInfo);
-    }
-  };
-
-  const onTriggerRocketView = () => {
-    if (userInfo) {
-      triggerRocketView(userInfo);
-    }
-  };
+  const [selectedPanel, setSelectedPanel] = useState<PanelType>('navigation');
 
   useEffect(() => {
     if (userInfo?.notification) {
@@ -165,16 +152,24 @@ export function Game({ user }: Props) {
               </>
             )}
           </div>
-          <PanelSelector
-            selectedPanel={selectedPanel}
-            setSelectedPanel={setSelectedPanel}
-            onTriggerOverheadView={onTriggerOverheadView}
-            onTriggerRocketView={onTriggerRocketView}
-          />
         </Header>
         <Center>
           {selectedPanel && (
             <Panel>
+              {selectedPanel !== 'menu' && (
+                <button
+                  style={{ marginBottom: '8px' }}
+                  onClick={() => setSelectedPanel('menu')}
+                >
+                  ⬅️
+                </button>
+              )}
+              {selectedPanel === 'menu' && (
+                <PanelSelector
+                  selectedPanel={selectedPanel}
+                  setSelectedPanel={setSelectedPanel}
+                />
+              )}
               {selectedPanel === 'navigation' && (
                 <NavigationPanel
                   userInfo={userInfo}

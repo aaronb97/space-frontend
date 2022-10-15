@@ -29,6 +29,7 @@ import {
   renderer,
   scene,
   triggerRocketView,
+  triggerViewShift,
 } from './threeGlobals';
 
 type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
@@ -247,7 +248,17 @@ const Visualizer = ({ user }: Props) => {
     };
   }, [intervals]);
 
-  return <div ref={ref} />;
+  return (
+    <div
+      ref={ref}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (e.detail === 2 && userInfo) {
+          triggerViewShift(userInfo);
+        }
+      }}
+    />
+  );
 };
 
 export default Visualizer;

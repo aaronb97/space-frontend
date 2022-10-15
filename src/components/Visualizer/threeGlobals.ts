@@ -10,6 +10,7 @@ import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../../types/UserData';
 import { getScaledPosition } from './getScaledPosition';
 import { getRandomCameraPosition } from './getRandomCameraPosition';
+import { Vector3 } from 'three';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -94,6 +95,31 @@ const triggerRocketView = (userInfo: UserData) => {
     .start();
 };
 
+const triggerViewShift = (userInfo: UserData) => {
+  const [x, y, z] = getScaledPosition(userInfo);
+
+  const [xRand, yRand, zRand] = getRandomCameraPosition(userInfo);
+  const newRocketVector = new Vector3(x + xRand, y + yRand, z + zRand);
+  const overheadVector = new Vector3(x, y, 1000);
+
+  const resultVector =
+    camera.position.distanceTo(newRocketVector) <
+    camera.position.distanceTo(overheadVector)
+      ? overheadVector
+      : newRocketVector;
+
+  console.log(resultVector);
+
+  new TWEEN.Tween(camera.position)
+    .to(resultVector)
+    .onUpdate((newCoords) => {
+      camera.position.set(newCoords.x, newCoords.y, newCoords.z);
+    })
+    .easing(TWEEN.Easing.Quartic.Out)
+    .duration(3000)
+    .start();
+};
+
 export {
   scene,
   camera,
@@ -104,4 +130,5 @@ export {
   composer,
   triggerOverheadView,
   triggerRocketView,
+  triggerViewShift,
 };
