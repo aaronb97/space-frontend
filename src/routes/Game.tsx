@@ -1,11 +1,5 @@
-import {
-  GoogleAuthProvider,
-  linkWithPopup,
-  signOut,
-  User,
-} from 'firebase/auth';
+import { GoogleAuthProvider, linkWithPopup, User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
-import { auth } from '../firebase/firebaseApp';
 import { usePlanets } from '../hooks/usePlanets';
 import { useUserData } from '../hooks/useUserData';
 import styled from 'styled-components';
@@ -50,19 +44,6 @@ const Footer = styled.footer`
   display: flex;
   justify-content: space-between;
 `;
-
-const SignOutButton = () => {
-  return (
-    <button
-      style={{ margin: '8px' }}
-      onClick={() => {
-        void signOut(auth);
-      }}
-    >
-      Sign Out
-    </button>
-  );
-};
 
 export function Game({ user }: Props) {
   const [isAnonymous, setIsAnonymous] = useState(user.isAnonymous);
@@ -185,7 +166,6 @@ export function Game({ user }: Props) {
           )}
         </Center>
         <Footer>
-          {<SignOutButton />}
           {isAnonymous && (
             <button
               onClick={() => {

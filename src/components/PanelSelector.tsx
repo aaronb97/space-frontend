@@ -1,3 +1,5 @@
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase/firebaseApp';
 import { PanelType } from '../types/Panel';
 
 interface Props {
@@ -47,6 +49,16 @@ export const PanelSelector = ({ selectedPanel, setSelectedPanel }: Props) => {
             }}
           >
             Groups
+          </button>
+        </div>
+        <div>
+          <button
+            style={{ width: '100%', marginTop: '24px' }}
+            onClick={() => {
+              void signOut(auth);
+            }}
+          >
+            Sign Out
           </button>
         </div>
       </div>
