@@ -12,7 +12,7 @@ export const setObjColor = (obj: THREE.Group, color: string) => {
 
         const hours = new Date().getHours();
 
-        if (hours >= 8 && hours < 20) {
+        if (hours >= 8 && hours <= 20) {
           subObj.material.color.set(0xfff8e3);
         } else {
           subObj.material.color.set(0x000000);
