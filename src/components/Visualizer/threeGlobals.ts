@@ -33,6 +33,8 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.physicallyCorrectLights = true;
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.shadowMap.enabled = true;
+
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const composer = new EffectComposer(renderer);
