@@ -9,6 +9,7 @@ import { Counter } from './Counter';
 import { DestinationPicker } from './DestinationPicker';
 import { Notification } from '../components/Notification';
 import { UserStatus } from '../types/UserStatus';
+import { PanelContent } from './PanelContent';
 
 const Section = styled.div`
   margin-top: 16px;
@@ -66,7 +67,7 @@ export const NavigationPanel = ({
     : undefined;
 
   return (
-    <>
+    <PanelContent>
       {userInfo.status === UserStatus.TRAVELING && (
         <div>Traveling to {userInfo.planet.name}</div>
       )}
@@ -196,6 +197,6 @@ export const NavigationPanel = ({
           />
         ))}
       </CenterText>
-    </>
+    </PanelContent>
   );
 };

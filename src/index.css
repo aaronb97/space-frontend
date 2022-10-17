@@ -10,22 +10,27 @@ body {
 }
 
 button {
-  background: #111111;
-  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: inherit;
+  border: none;
+  cursor: pointer;
+  /* font: inherit; */
   padding: 6px;
-  transition: 0.2s;
+  outline: inherit;
+  border: 1px solid white;
+  border-radius: 4px;
 }
 
-button:disabled {
-  color: #555555;
+button:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
 }
 
-button:enabled {
-  color: white;
-}
-
-button:hover:enabled {
-  border-color: #dddddd;
+.icon-button {
+  border-radius: 16px;
+  font-size: larger;
+  border: none;
+  width: 32px;
 }
 
 canvas {

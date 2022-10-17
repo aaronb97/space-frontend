@@ -15,49 +15,66 @@ export const PanelSelector = ({ selectedPanel, setSelectedPanel }: Props) => {
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          width: '88px',
+          width: '116px',
         }}
       >
         <div>
           <button
-            style={{ width: '100%' }}
+            className="btn"
+            style={{ width: '100%', textAlign: 'left' }}
             disabled={selectedPanel === 'items'}
             onClick={() => {
               setSelectedPanel('items');
             }}
           >
+            <i
+              style={{ marginRight: '8px', marginLeft: '8px' }}
+              className="fa-solid fa-box"
+            />
             Items
           </button>
         </div>
         <div>
           <button
-            style={{ width: '100%' }}
+            style={{ width: '100%', textAlign: 'left' }}
             disabled={selectedPanel === 'navigation'}
             onClick={() => {
               setSelectedPanel('navigation');
             }}
           >
+            <i
+              style={{ marginRight: '8px', marginLeft: '8px' }}
+              className="fa-solid fa-map-location-dot"
+            />
             Navigation
           </button>
         </div>
         <div>
           <button
-            style={{ width: '100%' }}
+            style={{ width: '100%', textAlign: 'left' }}
             disabled={selectedPanel === 'groups'}
             onClick={() => {
               setSelectedPanel('groups');
             }}
           >
+            <i
+              style={{ marginRight: '8px', marginLeft: '8px' }}
+              className="fa-solid fa-user-group"
+            />
             Groups
           </button>
         </div>
         <div>
           <button
-            style={{ width: '100%', marginTop: '24px' }}
+            style={{ width: '100%', textAlign: 'left', marginTop: '24px' }}
             onClick={() => {
               void signOut(auth);
             }}
           >
+            <i
+              style={{ marginRight: '8px', marginLeft: '8px' }}
+              className="fa-solid fa-arrow-right-from-bracket"
+            />
             Sign Out
           </button>
         </div>

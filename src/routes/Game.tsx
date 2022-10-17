@@ -15,10 +15,10 @@ import { useQueryClient } from 'react-query';
 import { ColoredUsername } from '../components/ColoredUsername';
 import { PanelSelector } from '../components/PanelSelector';
 import { PanelType } from '../types/Panel';
-// import {
-//   triggerOverheadView,
-//   triggerRocketView,
-// } from '../components/Visualizer/threeGlobals';
+import {
+  triggerOverheadView,
+  triggerRocketView,
+} from '../components/Visualizer/threeGlobals';
 
 interface Props {
   user: User;
@@ -120,36 +120,74 @@ export function Game({ user }: Props) {
       <Visualizer user={user} />
       <>
         <Header>
-          <div>
-            {isAnonymous ? (
-              <div>
-                Signed in as Guest (<ColoredUsername userInfo={userInfo} />)
-              </div>
-            ) : (
-              <>
-                <div>
-                  Signed in as <ColoredUsername userInfo={userInfo} />
-                </div>
-              </>
-            )}
-          </div>
+          <div />
+          {selectedPanel === undefined && (
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button
+                className="icon-button"
+                onClick={() => setSelectedPanel('menu')}
+              >
+                <i className="fa-solid fa-bars" />
+              </button>
+              <button
+                className="icon-button"
+                onClick={() => triggerRocketView(userInfo)}
+              >
+                <i className="fa-solid fa-rocket" />
+              </button>
+              <button
+                className="icon-button"
+                onClick={() => triggerOverheadView(userInfo)}
+              >
+                <i className="fa-solid fa-magnifying-glass-minus" />
+              </button>
+            </div>
+          )}
         </Header>
         <Center>
           {selectedPanel && (
             <Panel>
               {selectedPanel !== 'menu' && (
-                <button
-                  style={{ marginBottom: '8px' }}
-                  onClick={() => setSelectedPanel('menu')}
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between' }}
                 >
-                  ⬅️
-                </button>
+                  <button
+                    className="icon-button"
+                    style={{ marginBottom: '8px' }}
+                    onClick={() => setSelectedPanel('menu')}
+                  >
+                    <i className="fa-solid fa-bars" />
+                  </button>
+                  <button
+                    className="icon-button"
+                    style={{ marginBottom: '8px' }}
+                    onClick={() => setSelectedPanel(undefined)}
+                  >
+                    <i className="fa-solid fa-x" />
+                  </button>
+                </div>
               )}
               {selectedPanel === 'menu' && (
-                <PanelSelector
-                  selectedPanel={selectedPanel}
-                  setSelectedPanel={setSelectedPanel}
-                />
+                <>
+                  <div style={{ marginBottom: '16px' }}>
+                    {isAnonymous ? (
+                      <div>
+                        Signed in as Guest (
+                        <ColoredUsername userInfo={userInfo} />)
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          Signed in as <ColoredUsername userInfo={userInfo} />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <PanelSelector
+                    selectedPanel={selectedPanel}
+                    setSelectedPanel={setSelectedPanel}
+                  />
+                </>
               )}
               {selectedPanel === 'navigation' && (
                 <NavigationPanel
