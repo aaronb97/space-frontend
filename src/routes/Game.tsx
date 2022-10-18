@@ -127,19 +127,28 @@ export function Game({ user }: Props) {
                 className="icon-button"
                 onClick={() => setSelectedPanel('menu')}
               >
-                <i className="fa-solid fa-bars" />
+                <i
+                  className="fa-solid fa-bars"
+                  aria-label="Menu"
+                />
               </button>
               <button
                 className="icon-button"
                 onClick={() => triggerRocketView(userInfo)}
               >
-                <i className="fa-solid fa-rocket" />
+                <i
+                  className="fa-solid fa-rocket"
+                  aria-label="Rocket view"
+                />
               </button>
               <button
                 className="icon-button"
                 onClick={() => triggerOverheadView(userInfo)}
               >
-                <i className="fa-solid fa-magnifying-glass-minus" />
+                <i
+                  className="fa-solid fa-magnifying-glass-minus"
+                  aria-label="Overhead view"
+                />
               </button>
             </div>
           )}
@@ -156,14 +165,20 @@ export function Game({ user }: Props) {
                     style={{ marginBottom: '8px' }}
                     onClick={() => setSelectedPanel('menu')}
                   >
-                    <i className="fa-solid fa-bars" />
+                    <i
+                      className="fa-solid fa-bars"
+                      aria-label="Menu"
+                    />
                   </button>
                   <button
                     className="icon-button"
                     style={{ marginBottom: '8px' }}
                     onClick={() => setSelectedPanel(undefined)}
                   >
-                    <i className="fa-solid fa-x" />
+                    <i
+                      className="fa-solid fa-x"
+                      aria-label="Close"
+                    />
                   </button>
                 </div>
               )}
