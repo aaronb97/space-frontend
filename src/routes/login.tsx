@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { TextIconButton } from '../components/TextIconButton';
 import { auth } from '../firebase/firebaseApp';
 import { logError } from '../utils/logError';
 
@@ -64,48 +65,72 @@ export function Login() {
 
   if (emailClicked) {
     return (
-      <Container>
-        <input
-          placeholder="E-mail"
-          onChange={(e) => setEmail(e.target.value)}
-          type="email"
-        />
-        <input
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          type="password"
-        />
-        <button
-          onClick={onClickEmailSignIn}
-          disabled={!email || !password}
-        >
-          Sign In
-        </button>
-        <button
-          onClick={onClickEmailSignUp}
-          disabled={!email || !password}
-        >
-          Sign Up
-        </button>
-        <button onClick={() => setEmailClicked(false)}>Back</button>
-      </Container>
+      <OuterContainer>
+        <InnerContainer>
+          <input
+            placeholder="E-mail"
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+          />
+          <input
+            placeholder="Password"
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+          />
+          <button
+            onClick={onClickEmailSignIn}
+            disabled={!email || !password}
+          >
+            Sign In
+          </button>
+          <button
+            onClick={onClickEmailSignUp}
+            disabled={!email || !password}
+          >
+            Sign Up
+          </button>
+          <button onClick={() => setEmailClicked(false)}>Back</button>
+        </InnerContainer>
+      </OuterContainer>
     );
   }
 
   return (
-    <Container>
-      <button onClick={onClickGoogle}>Sign in with Google</button>
-      <button onClick={onClickEmail}>Sign in with Email</button>
-      <button onClick={onClickGuest}>Continue as Guest</button>
-    </Container>
+    <OuterContainer>
+      <InnerContainer>
+        <TextIconButton
+          onClick={onClickGoogle}
+          iconClassName="fa-brands fa-google"
+        >
+          Google Sign-In
+        </TextIconButton>
+        <TextIconButton
+          onClick={onClickEmail}
+          iconClassName="fa-solid fa-envelope"
+        >
+          Email Sign-In
+        </TextIconButton>
+        <TextIconButton
+          onClick={onClickGuest}
+          iconClassName="fa-solid fa-user-large"
+        >
+          Continue as Guest
+        </TextIconButton>
+      </InnerContainer>
+    </OuterContainer>
   );
 }
 
-const Container = styled.div`
+const OuterContainer = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 500px;
+  align-items: center;
+  height: 50vh;
+`;
+
+const InnerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 `;

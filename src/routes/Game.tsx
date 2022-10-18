@@ -183,10 +183,7 @@ export function Game({ user }: Props) {
                       </>
                     )}
                   </div>
-                  <PanelSelector
-                    selectedPanel={selectedPanel}
-                    setSelectedPanel={setSelectedPanel}
-                  />
+                  <PanelSelector setSelectedPanel={setSelectedPanel} />
                 </>
               )}
               {selectedPanel === 'navigation' && (

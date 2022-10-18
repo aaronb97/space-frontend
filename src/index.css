@@ -33,6 +33,11 @@ button:hover {
   width: 32px;
 }
 
+.text-icon-button {
+  width: 100%;
+  text-align: left;
+}
+
 canvas {
   position: fixed;
   margin: 0;
