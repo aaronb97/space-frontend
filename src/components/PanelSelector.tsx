@@ -20,7 +20,7 @@ export const PanelSelector = ({ setSelectedPanel }: Props) => {
       >
         <TextIconButton
           onClick={() => {
-            setSelectedPanel('navigation');
+            setSelectedPanel('items');
           }}
           iconClassName="fa-solid fa-box"
         >
