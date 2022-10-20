@@ -29,7 +29,7 @@ export function Login() {
       const join = searchParams.get('join');
       if (user) {
         if (join) {
-          navigate('/?join=' + join);
+          navigate('/play?join=' + join);
         } else {
           navigate('/play');
         }
