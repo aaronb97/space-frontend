@@ -31,7 +31,7 @@ export const About = () => {
 
       <footer className="about-footer">
         <IconAnchor
-          href="mailto:spacegame.support@gmail.com"
+          href="mailto:aaron9becker7@gmail.com"
           aria-label="Mail Support"
           target="_blank"
           iconClassName="fa-solid fa-envelope"
