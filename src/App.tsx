@@ -33,7 +33,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Routes>
         <Route
-          path="/"
+          path="/play"
           element={user ? <Game user={user} /> : 'Loading...'}
         />
       </Routes>

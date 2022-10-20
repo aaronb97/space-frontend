@@ -1,11 +1,19 @@
 .icon-button {
+  text-align: center;
   border-radius: 16px;
   font-size: larger;
   border: none;
+  background: none;
   width: 32px;
+  color: lightgray;
 }
 
 .icon-button:hover {
+  color: white;
+  border: none;
+}
+
+.icon-button:active {
   background: white;
   color: black;
   border: none;

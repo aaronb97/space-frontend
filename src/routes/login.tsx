@@ -31,7 +31,7 @@ export function Login() {
         if (join) {
           navigate('/?join=' + join);
         } else {
-          navigate('/');
+          navigate('/play');
         }
       }
     });
