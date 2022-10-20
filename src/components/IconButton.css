@@ -1,0 +1,12 @@
+.icon-button {
+  border-radius: 16px;
+  font-size: larger;
+  border: none;
+  width: 32px;
+}
+
+.icon-button:hover {
+  background: white;
+  color: black;
+  border: none;
+}

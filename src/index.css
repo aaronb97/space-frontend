@@ -17,25 +17,17 @@ button {
   /* font: inherit; */
   padding: 6px;
   outline: inherit;
-  border: 1px solid white;
+  border: 1px solid grey;
   border-radius: 4px;
 }
 
 button:hover {
+  border: 1px solid white;
+}
+
+button:active {
   background: rgba(255, 255, 255, 0.9);
   color: black;
-}
-
-.icon-button {
-  border-radius: 16px;
-  font-size: larger;
-  border: none;
-  width: 32px;
-}
-
-.text-icon-button {
-  width: 100%;
-  text-align: left;
 }
 
 canvas {

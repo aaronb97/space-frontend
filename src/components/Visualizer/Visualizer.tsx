@@ -18,8 +18,6 @@ import { setObjOpacity } from './setObjOpacity';
 import { processCameraAnimation } from './processCameraAnimation';
 import { circleInterval } from './circleInterval';
 import { createPlanetSpheres } from './createPlanetSpheres';
-import { Vector3 } from 'three';
-import { DISTANCE_FACTOR } from './constants';
 import {
   camera,
   composer,

@@ -19,6 +19,7 @@ import {
   triggerOverheadView,
   triggerRocketView,
 } from '../components/Visualizer/threeGlobals';
+import { IconButton } from '../components/IconButton';
 
 interface Props {
   user: User;
@@ -123,33 +124,21 @@ export function Game({ user }: Props) {
           <div />
           {selectedPanel === undefined && (
             <div style={{ display: 'flex', gap: '4px' }}>
-              <button
-                className="icon-button"
+              <IconButton
+                iconClassName="fa-solid fa-bars"
+                aria-label="Menu"
                 onClick={() => setSelectedPanel('menu')}
-              >
-                <i
-                  className="fa-solid fa-bars"
-                  aria-label="Menu"
-                />
-              </button>
-              <button
-                className="icon-button"
+              />
+              <IconButton
+                iconClassName="fa-solid fa-rocket"
+                aria-label="Rocket view"
                 onClick={() => triggerRocketView(userInfo)}
-              >
-                <i
-                  className="fa-solid fa-rocket"
-                  aria-label="Rocket view"
-                />
-              </button>
-              <button
-                className="icon-button"
+              />
+              <IconButton
+                iconClassName="fa-solid fa-magnifying-glass-minus"
+                aria-label="Overhead view"
                 onClick={() => triggerOverheadView(userInfo)}
-              >
-                <i
-                  className="fa-solid fa-magnifying-glass-minus"
-                  aria-label="Overhead view"
-                />
-              </button>
+              />
             </div>
           )}
         </Header>
@@ -160,26 +149,16 @@ export function Game({ user }: Props) {
                 <div
                   style={{ display: 'flex', justifyContent: 'space-between' }}
                 >
-                  <button
-                    className="icon-button"
-                    style={{ marginBottom: '8px' }}
+                  <IconButton
+                    iconClassName="fa-solid fa-bars"
+                    aria-label="Menu"
                     onClick={() => setSelectedPanel('menu')}
-                  >
-                    <i
-                      className="fa-solid fa-bars"
-                      aria-label="Menu"
-                    />
-                  </button>
-                  <button
-                    className="icon-button"
-                    style={{ marginBottom: '8px' }}
+                  />
+                  <IconButton
+                    iconClassName="fa-solid fa-x"
+                    aria-label="Close panel"
                     onClick={() => setSelectedPanel(undefined)}
-                  >
-                    <i
-                      className="fa-solid fa-x"
-                      aria-label="Close"
-                    />
-                  </button>
+                  />
                 </div>
               )}
               {selectedPanel === 'menu' && (
