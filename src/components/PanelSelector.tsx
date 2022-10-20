@@ -52,7 +52,7 @@ export const PanelSelector = ({ setSelectedPanel }: Props) => {
           iconClassName="fa-solid fa-circle-info"
           style={{ marginTop: '16px' }}
         >
-          Info
+          About
         </TextIconButton>
         <TextIconButton
           onClick={() => {
