@@ -1,4 +1,5 @@
 import { signOut } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase/firebaseApp';
 import { PanelType } from '../types/Panel';
 import { TextIconButton } from './TextIconButton';
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export const PanelSelector = ({ setSelectedPanel }: Props) => {
+  const navigate = useNavigate();
+
   return (
     <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
       <div
@@ -20,14 +23,6 @@ export const PanelSelector = ({ setSelectedPanel }: Props) => {
       >
         <TextIconButton
           onClick={() => {
-            setSelectedPanel('items');
-          }}
-          iconClassName="fa-solid fa-box"
-        >
-          Items
-        </TextIconButton>
-        <TextIconButton
-          onClick={() => {
             setSelectedPanel('navigation');
           }}
           iconClassName="fa-solid fa-map-location-dot"
@@ -36,11 +31,28 @@ export const PanelSelector = ({ setSelectedPanel }: Props) => {
         </TextIconButton>
         <TextIconButton
           onClick={() => {
+            setSelectedPanel('items');
+          }}
+          iconClassName="fa-solid fa-box"
+        >
+          Items
+        </TextIconButton>
+        <TextIconButton
+          onClick={() => {
             setSelectedPanel('groups');
           }}
           iconClassName="fa-solid fa-user-group"
         >
           Groups
+        </TextIconButton>
+        <TextIconButton
+          onClick={() => {
+            navigate('/');
+          }}
+          iconClassName="fa-solid fa-circle-info"
+          style={{ marginTop: '16px' }}
+        >
+          Info
         </TextIconButton>
         <TextIconButton
           onClick={() => {
