@@ -1,9 +1,11 @@
 import { onAuthStateChanged, User } from 'firebase/auth';
-import React, { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router-dom';
 import { auth } from './firebase/firebaseApp';
-import { Game } from './routes/Game';
+
+// eslint-disable-next-line @typescript-eslint/promise-function-async
+const Game = lazy(() => import('./routes/Game'));
 
 const queryClient = new QueryClient();
 
@@ -34,7 +36,11 @@ function App() {
       <Routes>
         <Route
           path="/play"
-          element={user ? <Game user={user} /> : 'Loading...'}
+          element={
+            <Suspense fallback={'Loading...'}>
+              {user ? <Game user={user} /> : 'Loading...'}
+            </Suspense>
+          }
         />
       </Routes>
     </QueryClientProvider>

@@ -46,7 +46,7 @@ const Footer = styled.footer`
   justify-content: space-between;
 `;
 
-export function Game({ user }: Props) {
+export default function Game({ user }: Props) {
   const [isAnonymous, setIsAnonymous] = useState(user.isAnonymous);
   const [notification, setNotification] = useState<string | undefined>('');
   const [groupNotification, setGroupNotification] = useState<
