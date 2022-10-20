@@ -31,6 +31,7 @@ import {
   triggerRocketView,
   triggerViewShift,
 } from './threeGlobals';
+import { getUnitDirectionVector } from './getUnitDirectionVector';
 
 type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
 export type PlanetObjects = Record<
@@ -119,11 +120,7 @@ const Visualizer = ({ user }: Props) => {
         );
 
         rocketObj.rotateOnAxis(
-          new Vector3(
-            rocketObj.position.x - userInfo.planet.positionX / DISTANCE_FACTOR,
-            rocketObj.position.y - userInfo.planet.positionY / DISTANCE_FACTOR,
-            rocketObj.position.z - userInfo.planet.positionZ / DISTANCE_FACTOR,
-          ).normalize(),
+          getUnitDirectionVector(userInfo, rocketObj),
           0.01,
         );
       }
