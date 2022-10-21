@@ -8,7 +8,7 @@ interface Props {
   setSelectedPanel: React.Dispatch<React.SetStateAction<PanelType>>;
 }
 
-export const PanelSelector = ({ setSelectedPanel }: Props) => {
+export const Menu = ({ setSelectedPanel }: Props) => {
   const navigate = useNavigate();
 
   return (

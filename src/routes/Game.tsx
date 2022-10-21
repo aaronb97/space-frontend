@@ -13,7 +13,7 @@ import { useSearchParams } from 'react-router-dom';
 import { client } from '../client';
 import { useQueryClient } from 'react-query';
 import { ColoredUsername } from '../components/ColoredUsername';
-import { PanelSelector } from '../components/PanelSelector';
+import { Menu } from '../components/Menu';
 import { PanelType } from '../types/Panel';
 import {
   triggerOverheadView,
@@ -177,7 +177,7 @@ export default function Game({ user }: Props) {
                       </>
                     )}
                   </div>
-                  <PanelSelector setSelectedPanel={setSelectedPanel} />
+                  <Menu setSelectedPanel={setSelectedPanel} />
                 </>
               )}
               {selectedPanel === 'navigation' && (
