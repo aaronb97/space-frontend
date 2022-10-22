@@ -79,7 +79,7 @@ const triggerOverheadView = (userInfo: UserData) => {
     .start();
 };
 
-const triggerRocketView = (userInfo: UserData) => {
+const triggerRocketView = (userInfo: UserData, duration = 5000) => {
   const [x, y, z] = getScaledPosition(userInfo);
   const [xRand, yRand, zRand] = getRandomCameraPosition(userInfo);
 
@@ -93,7 +93,7 @@ const triggerRocketView = (userInfo: UserData) => {
       camera.position.set(newCoords.x, newCoords.y, newCoords.z);
     })
     .easing(TWEEN.Easing.Quartic.Out)
-    .duration(5000)
+    .duration(duration)
     .start();
 };
 

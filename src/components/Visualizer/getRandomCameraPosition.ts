@@ -13,7 +13,7 @@ export const getRandomCameraPosition = (
   const [xRand, yRand, zRand] = [
     Math.random() - 0.5,
     Math.random() - 0.5,
-    Math.random() / 2,
+    Math.random() - 0.5,
   ];
 
   const normal = 1 / Math.sqrt(sqr(xRand) + sqr(yRand) + sqr(zRand));

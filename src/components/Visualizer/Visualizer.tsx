@@ -7,7 +7,6 @@ import { User } from 'firebase/auth';
 import * as TWEEN from '@tweenjs/tween.js';
 import { UserData } from '../../types/UserData';
 import { Planet } from '../../types/Planet';
-import { getRandomCameraPosition } from './getRandomCameraPosition';
 import { getScaledPosition } from './getScaledPosition';
 import { makeObjLookAt } from './makeObjLookAt';
 import { setObjColor } from './setObjColor';
@@ -98,13 +97,7 @@ const Visualizer = ({ user }: Props) => {
     if (!ref.current?.contains(renderer.domElement)) {
       ref.current?.appendChild(renderer.domElement);
       if (userInfo) {
-        const [xRand, yRand, zRand] = getRandomCameraPosition(userInfo);
-
-        const [x, y, z] = getScaledPosition(userInfo);
-
-        camera.position.set(x + xRand, y + yRand, z + zRand);
-
-        camera.lookAt(x, y, z);
+        triggerRocketView(userInfo, 0);
       }
     }
 
