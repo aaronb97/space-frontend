@@ -132,7 +132,11 @@ export default function Game({ user }: Props) {
               <IconButton
                 iconClassName="fa-solid fa-rocket"
                 aria-label="Rocket view"
-                onClick={() => triggerRocketView(userInfo)}
+                onClick={() => {
+                  void queryClient.invalidateQueries(['userInfo']).then(() => {
+                    triggerRocketView(userInfo);
+                  });
+                }}
               />
               <IconButton
                 iconClassName="fa-solid fa-magnifying-glass-minus"

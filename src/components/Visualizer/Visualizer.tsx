@@ -30,6 +30,7 @@ import {
   triggerViewShift,
 } from './threeGlobals';
 import { getUnitDirectionVector } from './getUnitDirectionVector';
+import { createOutlinePass } from './outlinePass';
 
 type Sphere = THREE.Mesh<THREE.SphereGeometry, THREE.Material>;
 export type PlanetObjects = Record<
@@ -47,6 +48,7 @@ const planetObjects: PlanetObjects = {};
 
 let sky: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | undefined;
 let rocketObj: THREE.Group | undefined;
+let loadingRocket = false;
 let lastTimestamp: DOMHighResTimeStamp = 0;
 let lastAnimationFrame: number | undefined;
 
@@ -176,6 +178,41 @@ const Visualizer = ({ user }: Props) => {
   }, [userInfo?.status]);
 
   useEffect(() => {
+    if (
+      userInfo &&
+      userInfo.status === UserStatus.TRAVELING &&
+      !loadingRocket
+    ) {
+      const [x, y, z] = getScaledPosition(userInfo);
+      loadingRocket = true;
+      loader.load('Rocket.obj', (obj) => {
+        rocketObj = obj;
+        scene.add(obj);
+        obj.position.set(x, y, z);
+
+        const rocketOutlinePass = createOutlinePass(
+          scene,
+          camera,
+          userInfo.color,
+        );
+
+        rocketOutlinePass.edgeStrength = 2;
+        rocketOutlinePass.selectedObjects = [obj];
+        composer.addPass(rocketOutlinePass);
+
+        makeObjLookAt(obj, userInfo.planet);
+        setObjColor(obj, userInfo.color);
+
+        const scale = 0.0005;
+        obj.scale.set(scale, scale, scale);
+      });
+    } else if (userInfo && userInfo.status === UserStatus.LANDED) {
+      if (rocketObj) {
+        scene.remove(rocketObj);
+        loadingRocket = false;
+      }
+    }
+
     if (planets?.length && userInfo) {
       if (!sky) {
         sky = createSky();
@@ -193,20 +230,6 @@ const Visualizer = ({ user }: Props) => {
       setCurrentPlanetId(userInfo.planet.id);
 
       if (Object.keys(planetObjects).length === 0) {
-        if (!rocketObj) {
-          loader.load('Rocket.obj', (obj) => {
-            rocketObj = obj;
-            scene.add(obj);
-            obj.position.set(x, y, z);
-
-            makeObjLookAt(obj, userInfo.planet);
-            setObjColor(obj, userInfo.color);
-
-            const scale = 0.0005;
-            obj.scale.set(scale, scale, scale);
-          });
-        }
-
         const light = new THREE.PointLight(0xffffff, 50, 0, 0.5);
 
         light.position.set(0, 0, 0);
@@ -239,6 +262,7 @@ const Visualizer = ({ user }: Props) => {
       }
 
       rocketObj = undefined;
+      loadingRocket = false;
       intervals.forEach((interval) => clearInterval(interval));
     };
   }, [intervals]);
